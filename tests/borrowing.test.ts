@@ -31,17 +31,32 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
       .send({ email: 'custodian@example.com', password: 'Password123!' });
     custodianToken = cRes.body.token;
 
-    // Fetch items from seed
-    const items = await prisma.item.findMany();
-    const available = items.find((i) => i.isAvailable);
-    const unavailable = items.find((i) => !i.isAvailable);
+    // Clean previous test-created loans to ensure clean test state
+    await prisma.loan.deleteMany({});
 
-    if (!available || !unavailable) {
-      throw new Error('Seed data missing available or unavailable items');
+    // Reset base items
+    await prisma.item.updateMany({
+      where: { serialNumber: { in: ['OSC-2026-001', 'RPI-2026-002'] } },
+      data: { isAvailable: true }
+    });
+
+    const unavailable = await prisma.item.findUnique({
+      where: { serialNumber: 'LA-2026-003' }
+    });
+    if (unavailable) {
+      await prisma.item.update({
+        where: { id: unavailable.id },
+        data: { isAvailable: false }
+      });
+      unavailableItem = unavailable;
     }
 
-    availableItem = available;
-    unavailableItem = unavailable;
+    const available = await prisma.item.findUnique({
+      where: { serialNumber: 'OSC-2026-001' }
+    });
+    if (available) {
+      availableItem = available;
+    }
   });
 
   afterAll(async () => {
@@ -98,10 +113,11 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
   // TEST-LOAN-03 / AC-12: Custodian checks out requested loan -> Loan is ACTIVE, Item is unavailable
   it('TEST-LOAN-03: Custodian checks out requested loan -> Loan is ACTIVE, Item is unavailable (AC-12)', async () => {
     // 1. Create a fresh available item for a clean checkout flow
+    const uniqueSuffix = Math.random().toString(36).substring(2, 9);
     const testItem = await prisma.item.create({
       data: {
         title: 'Digital Multimeter DMM6500',
-        serialNumber: `DMM-TEST-${Date.now()}`,
+        serialNumber: `DMM-TEST-${uniqueSuffix}`,
         category: 'Electronics Lab',
         isAvailable: true
       }
@@ -133,10 +149,11 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
   // TEST-LOAN-04 / AC-05, BR-03: Borrower attempting checkout returns 403 Forbidden
   it('TEST-LOAN-04: Borrower attempting checkout returns 403 Forbidden (AC-05 / BR-03)', async () => {
     // 1. Borrower creates a request
+    const uniqueSuffix = Math.random().toString(36).substring(2, 9);
     const testItem = await prisma.item.create({
       data: {
         title: 'Soldering Station WT1010',
-        serialNumber: `SOL-TEST-${Date.now()}`,
+        serialNumber: `SOL-TEST-${uniqueSuffix}`,
         category: 'Electronics Lab',
         isAvailable: true
       }
@@ -162,10 +179,11 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
   // TEST-LOAN-05 / AC-11, BR-04: Borrower inspecting another user's loan returns 403 Forbidden
   it("TEST-LOAN-05: Borrower inspecting another user's loan returns 403 Forbidden (AC-11 / BR-04)", async () => {
     // Borrower 1 creates a loan
+    const uniqueSuffix = Math.random().toString(36).substring(2, 9);
     const testItem = await prisma.item.create({
       data: {
         title: 'Function Generator DG4102',
-        serialNumber: `FG-TEST-${Date.now()}`,
+        serialNumber: `FG-TEST-${uniqueSuffix}`,
         category: 'Electronics Lab',
         isAvailable: true
       }
