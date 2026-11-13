@@ -1,6 +1,7 @@
 # Multi-stage production Dockerfile for Inventory & Borrowing System
 # Stage 1: Build the React client
 FROM node:20-alpine AS client-builder
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -10,6 +11,7 @@ RUN npm run build
 
 # Stage 2: Production runtime image
 FROM node:20-alpine AS runner
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 
 ENV NODE_ENV=production
