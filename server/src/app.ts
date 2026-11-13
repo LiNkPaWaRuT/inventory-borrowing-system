@@ -25,6 +25,19 @@ app.get('/api/ready', async (_req, res) => {
   }
 });
 
+app.get('/api/categories', async (_req, res) => {
+  try {
+    const categories = await prisma.item.findMany({
+      select: { category: true },
+      distinct: ['category'],
+      orderBy: { category: 'asc' }
+    });
+    return res.status(200).json(categories.map((c) => c.category));
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
 // API route mounts
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
