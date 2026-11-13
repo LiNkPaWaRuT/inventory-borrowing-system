@@ -4,12 +4,27 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 const router = Router();
 
-// GET /api/items [AC-07: Borrower/Custodian can view catalog of items with live isAvailable status]
+// GET /api/items [AC-07: Borrower/Custodian can view catalog of items with live availability status]
 router.get('/', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const items = await prisma.item.findMany({
+    const rawItems = await prisma.item.findMany({
+      include: {
+        loans: {
+          where: { status: { in: ['REQUESTED', 'ACTIVE'] } }
+        }
+      },
       orderBy: { title: 'asc' }
     });
+
+    // An item is only truly available if its DB flag is true AND it has no active or requested loan
+    const items = rawItems.map((item: any) => ({
+      id: item.id,
+      title: item.title,
+      serialNumber: item.serialNumber,
+      category: item.category,
+      isAvailable: item.isAvailable && item.loans.length === 0,
+      hasPendingOrActiveLoan: item.loans.length > 0
+    }));
 
     return res.status(200).json({
       success: true,
