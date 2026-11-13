@@ -52,21 +52,22 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# Resource names (CHANGE ME: must match deploy/deploy.sh)
+# Resource names
 # ------------------------------------------------------------------------------
-REPO_NAME="toktickit"
-SQL_INSTANCE="toktickit-pg"
-SERVICE_NAME="toktickit"
-MIGRATE_JOB_NAME="toktickit-migrate"
-SA_NAME="toktickit-runner"
+REPO_NAME="inventory-repo"
+SQL_INSTANCE="inventory-db"
+SERVICE_NAME="inventory-service"
+MIGRATE_JOB_NAME="inventory-migrate"
+SA_NAME="inventory-runner"
 SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 
-SECRET_DB_URL="toktickit-database-url"
-SECRET_ADMIN_PASS="toktickit-admin-password"
-SECRET_DEMO_PASS="toktickit-demo-password"
+SECRET_DB_URL="inventory-database-url"
+SECRET_JWT="inventory-jwt-secret"
+SECRET_ADMIN_PASS="inventory-admin-password"
+SECRET_DEMO_PASS="inventory-demo-password"
 
 echo "=================================================================="
-echo "WARNING: This will permanently delete TokTickIT resources in:"
+echo "WARNING: This will permanently delete Inventory System resources in:"
 echo "  Project : ${PROJECT_ID}"
 echo "  Region  : ${REGION}"
 echo "Resources to be deleted:"
@@ -74,7 +75,7 @@ echo "  - Cloud Run Service : ${SERVICE_NAME}"
 echo "  - Cloud Run Job     : ${MIGRATE_JOB_NAME}"
 echo "  - Cloud SQL Instance: ${SQL_INSTANCE} (ALL DATABASE DATA WILL BE LOST)"
 echo "  - Artifact Registry : ${REPO_NAME}"
-echo "  - Secrets           : ${SECRET_DB_URL}, ${SECRET_ADMIN_PASS}, ${SECRET_DEMO_PASS}"
+echo "  - Secrets           : ${SECRET_DB_URL}, ${SECRET_JWT}, ${SECRET_ADMIN_PASS}, ${SECRET_DEMO_PASS}"
 echo "  - Service Account   : ${SA_EMAIL}"
 echo "=================================================================="
 
@@ -97,6 +98,7 @@ run_cmd gcloud run jobs delete "$MIGRATE_JOB_NAME" --region "$REGION" --project 
 run_cmd gcloud sql instances delete "$SQL_INSTANCE" --project "$PROJECT_ID" --quiet || true
 run_cmd gcloud artifacts repositories delete "$REPO_NAME" --location "$REGION" --project "$PROJECT_ID" --quiet || true
 run_cmd gcloud secrets delete "$SECRET_DB_URL" --project "$PROJECT_ID" --quiet || true
+run_cmd gcloud secrets delete "$SECRET_JWT" --project "$PROJECT_ID" --quiet || true
 run_cmd gcloud secrets delete "$SECRET_ADMIN_PASS" --project "$PROJECT_ID" --quiet || true
 run_cmd gcloud secrets delete "$SECRET_DEMO_PASS" --project "$PROJECT_ID" --quiet || true
 run_cmd gcloud iam service-accounts delete "$SA_EMAIL" --project "$PROJECT_ID" --quiet || true
