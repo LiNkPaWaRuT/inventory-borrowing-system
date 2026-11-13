@@ -104,7 +104,7 @@ jobs:
 
       - name: Setup Database & Run Tests (Prisma + Vitest)
         env:
-          DATABASE_URL: file:./prisma/dev.db
+          DATABASE_URL: postgresql://toktickit:toktickit@localhost:5432/toktickit?schema=public
           JWT_SECRET: cpe334-ci-test-jwt-secret-2026
           NODE_ENV: test
         run: |
