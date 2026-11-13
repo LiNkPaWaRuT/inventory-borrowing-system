@@ -17,7 +17,7 @@ router.get('/', requireAuth, async (req: AuthenticatedRequest, res: Response) =>
     });
 
     // An item is only truly available if its DB flag is true AND it has no active or requested loan
-    const items = rawItems.map((item) => ({
+    const items = rawItems.map((item: any) => ({
       id: item.id,
       title: item.title,
       serialNumber: item.serialNumber,
