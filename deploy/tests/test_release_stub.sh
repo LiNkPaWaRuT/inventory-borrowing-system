@@ -27,7 +27,7 @@ echo "$*" >> "$CALL_LOG"
 case "$*" in
   'artifacts docker images describe '*)
     [[ "${FAIL_AT:-}" != image ]] || exit 1
-    echo 'asia-southeast1-docker.pkg.dev/release-test/toktickit/toktickit@sha256:abcdef' ;;
+    echo 'asia-southeast1-docker.pkg.dev/release-test/inventory-repo/inventory-service@sha256:abcdef' ;;
   'run jobs execute '*) [[ "${FAIL_AT:-}" != migration ]] || exit 1 ;;
   'run services describe '*) echo 'https://demo.example.test' ;;
 esac
