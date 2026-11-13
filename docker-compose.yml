@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inventory-app
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - DATABASE_URL=file:/app/data/prod.db
+      - JWT_SECRET=cpe334-local-docker-jwt-secret-2026
+    volumes:
+      - inventory-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  inventory-data:
