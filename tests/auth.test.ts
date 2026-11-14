@@ -22,7 +22,8 @@ describe('Feature F01: Authentication & Role-Based Access Control', () => {
         password: 'Password123!'
       });
 
-    expect(res.status).toBe(200);
+    // Intentionally broken assertion for Check C-02: prove branch protection gate blocks failing PR
+    expect(res.status).toBe(999);
     expect(res.body.success).toBe(true);
     expect(res.body.token).toBeDefined();
     expect(res.body.user).toMatchObject({
@@ -91,7 +92,8 @@ describe('Feature F01: Authentication & Role-Based Access Control', () => {
       .get('/api/custodian/check')
       .set('Authorization', `Bearer ${custodianToken}`);
 
-    expect(res.status).toBe(200);
+    // Intentionally broken assertion for Check C-02: prove branch protection gate blocks failing PR
+    expect(res.status).toBe(999);
     expect(res.body.success).toBe(true);
   });
 
