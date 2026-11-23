@@ -16,15 +16,31 @@ router.get('/', requireAuth, async (req: AuthenticatedRequest, res: Response) =>
       orderBy: { title: 'asc' }
     });
 
-    // An item is only truly available if its DB flag is true AND it has no active or requested loan
-    const items = rawItems.map((item: any) => ({
-      id: item.id,
-      title: item.title,
-      serialNumber: item.serialNumber,
-      category: item.category,
-      isAvailable: item.isAvailable && item.loans.length === 0,
-      hasPendingOrActiveLoan: item.loans.length > 0
-    }));
+    // An item status:
+    // - AVAILABLE: DB flag is true and no active or requested loans
+    // - PENDING_APPROVAL: Has a loan in REQUESTED status awaiting Custodian checkout
+    // - CHECKED_OUT: Has an ACTIVE loan or DB flag is false
+    const items = rawItems.map((item: any) => {
+      const hasRequestedLoan = item.loans.some((l: any) => l.status === 'REQUESTED');
+      const hasActiveLoan = item.loans.some((l: any) => l.status === 'ACTIVE');
+
+      let catalogStatus: 'AVAILABLE' | 'PENDING_APPROVAL' | 'CHECKED_OUT' = 'AVAILABLE';
+      if (hasRequestedLoan) {
+        catalogStatus = 'PENDING_APPROVAL';
+      } else if (hasActiveLoan || !item.isAvailable) {
+        catalogStatus = 'CHECKED_OUT';
+      }
+
+      return {
+        id: item.id,
+        title: item.title,
+        serialNumber: item.serialNumber,
+        category: item.category,
+        isAvailable: item.isAvailable && item.loans.length === 0,
+        hasPendingOrActiveLoan: item.loans.length > 0,
+        catalogStatus
+      };
+    });
 
     return res.status(200).json({
       success: true,

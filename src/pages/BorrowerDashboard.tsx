@@ -7,6 +7,8 @@ interface Item {
   serialNumber: string;
   category: string;
   isAvailable: boolean;
+  hasPendingOrActiveLoan?: boolean;
+  catalogStatus?: 'AVAILABLE' | 'PENDING_APPROVAL' | 'CHECKED_OUT';
 }
 
 interface Loan {
@@ -153,11 +155,25 @@ export const BorrowerDashboard: React.FC = () => {
                           borderRadius: '12px',
                           fontSize: '12px',
                           fontWeight: 600,
-                          background: item.isAvailable ? '#dcfce7' : '#fee2e2',
-                          color: item.isAvailable ? '#15803d' : '#b91c1c'
+                          background:
+                            item.catalogStatus === 'PENDING_APPROVAL'
+                              ? '#fef3c7'
+                              : item.isAvailable
+                              ? '#dcfce7'
+                              : '#fee2e2',
+                          color:
+                            item.catalogStatus === 'PENDING_APPROVAL'
+                              ? '#b45309'
+                              : item.isAvailable
+                              ? '#15803d'
+                              : '#b91c1c'
                         }}
                       >
-                        {item.isAvailable ? '● Available' : '○ Checked Out'}
+                        {item.catalogStatus === 'PENDING_APPROVAL'
+                          ? '● Pending Review'
+                          : item.isAvailable
+                          ? '● Available'
+                          : '○ Checked Out'}
                       </span>
                     </td>
                     <td style={{ padding: '12px', textAlign: 'right' }}>
