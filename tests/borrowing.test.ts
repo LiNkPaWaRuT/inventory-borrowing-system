@@ -227,4 +227,35 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.loans)).toBe(true);
   });
+
+  // DEF-01 Regression Test: Distinguish PENDING / REQUESTED status from ACTIVE checkout in item catalog
+  it('TEST-DEF-01: should return catalog status distinguishing REQUESTED items from Checked Out (RED phase)', async () => {
+    // 1. Create a fresh available item
+    const pendingItem = await prisma.item.create({
+      data: {
+        title: 'Signal Generator SG-100',
+        serialNumber: `SG-${Date.now()}`,
+        category: 'Electronics Lab',
+        isAvailable: true
+      }
+    });
+
+    // 2. Borrower requests loan (loan status = REQUESTED)
+    await request(app)
+      .post('/api/loans/request')
+      .set('Authorization', `Bearer ${borrower1Token}`)
+      .send({ itemId: pendingItem.id });
+
+    // 3. Fetch item catalog
+    const catalogRes = await request(app)
+      .get('/api/items')
+      .set('Authorization', `Bearer ${borrower1Token}`);
+
+    expect(catalogRes.status).toBe(200);
+    const targetItem = catalogRes.body.items.find((i: any) => i.id === pendingItem.id);
+
+    // Reproduce DEF-01: Expect item to have a distinct catalogStatus = 'PENDING_APPROVAL' or status = 'REQUESTED'
+    // This will FAIL on current implementation because /api/items does not yet provide catalogStatus
+    expect(targetItem.catalogStatus).toBe('PENDING_APPROVAL');
+  });
 });
