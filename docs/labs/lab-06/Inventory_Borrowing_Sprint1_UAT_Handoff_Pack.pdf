@@ -1,0 +1,337 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R 10 0 R 12 0 R] /Count 4 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 9553 >>
+stream
+0.820 0.860 0.900 RG 0.60 w 40.00 36.00 m 572.00 36.00 l S
+BT /F1 8.50 Tf 0.420 0.460 0.520 rg 40.00 24.00 Td (Inventory & Borrowing System - Sprint 1 UAT Handoff Pack) Tj ET
+BT /F1 8.50 Tf 0.420 0.460 0.520 rg 475.00 24.00 Td (Section 31 - Team Egoist) Tj ET
+BT /F1 9.00 Tf 0.420 0.460 0.520 rg 545.00 755.00 Td (1 / 4) Tj ET
+BT /F2 15.50 Tf 0.100 0.150 0.220 rg 40.00 725.00 Td (Inventory & Borrowing Sprint 1 - User Acceptance Testing) Tj ET
+BT /F2 15.50 Tf 0.100 0.150 0.220 rg 40.00 707.00 Td (\(UAT\) Handoff Pack) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 40.00 688.00 Td (Course:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 82.00 688.00 Td (CPE 334 Introduction to Software Engineering in the Age of AI Agents \(Semester 1/2026\)) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 40.00 675.00 Td (Milestone:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 92.00 675.00 Td (Lab 6 - Independent User Acceptance Testing & Defect Management) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 40.00 662.00 Td (Product Team:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 108.00 662.00 Td (Section 31 - Team Egoist   |   App Theme: Theme 2: Inventory & Borrowing System) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 40.00 649.00 Td (Authors:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 82.00 649.00 Td (Pawarut Kumnungwut \( 67070503422 \) & Kawinpob Amnuaywittayakul \( 67070503403 \)) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 40.00 636.00 Td (Live Deployed URL:) Tj ET
+BT /F1 8.50 Tf 0.120 0.420 0.780 rg 138.00 636.00 Td (https://inventory-service-x6zw5ksjsa-as.a.run.app) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 40.00 623.00 Td (GitHub Repository:) Tj ET
+BT /F1 8.50 Tf 0.120 0.420 0.780 rg 132.00 623.00 Td (https://github.com/LiNkPaWaRuT/inventory-borrowing-system) Tj ET
+BT /F2 11.00 Tf 0.120 0.180 0.280 rg 40.00 598.00 Td (1. Tested Baseline & Environment Details) Tj ET
+0.940 0.960 0.980 rg 0.820 0.860 0.900 RG 0.60 w 40.00 569.00 532.00 17.00 re B
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 48.00 574.00 Td (Target Attribute) Tj ET
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 180.00 574.00 Td (Specification / Verified Value) Tj ET
+0.820 0.860 0.900 RG 0.60 w 40.00 552.00 532.00 17.00 re S
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 48.00 557.00 Td (Application Name) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 180.00 557.00 Td (Inventory & Equipment Borrowing System \(Department Lab Kiosk\)) Tj ET
+0.820 0.860 0.900 RG 0.60 w 40.00 535.00 532.00 17.00 re S
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 48.00 540.00 Td (Production Cloud URL) Tj ET
+BT /F1 8.00 Tf 0.120 0.420 0.780 rg 180.00 540.00 Td (https://inventory-service-x6zw5ksjsa-as.a.run.app) Tj ET
+0.820 0.860 0.900 RG 0.60 w 40.00 518.00 532.00 17.00 re S
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 48.00 523.00 Td (Baseline Release & SHA) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 180.00 523.00 Td (Release Sprint 1 / Lab 5 \(Commit: f89023add2051fb64c5f241663037dd8d0ee91de / short f89023a\)) Tj ET
+0.820 0.860 0.900 RG 0.60 w 40.00 501.00 532.00 17.00 re S
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 48.00 506.00 Td (Visual Version Marker) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 180.00 506.00 Td (Header title: Department Inventory & Equipment Borrowing) Tj ET
+0.820 0.860 0.900 RG 0.60 w 40.00 484.00 532.00 17.00 re S
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 48.00 489.00 Td (Hosting Infrastructure) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 180.00 489.00 Td (Google Cloud Platform: Cloud Run Serverless Container + Cloud SQL PostgreSQL 16) Tj ET
+0.820 0.860 0.900 RG 0.60 w 170.00 586.00 m 170.00 484.00 l S
+BT /F2 11.00 Tf 0.120 0.180 0.280 rg 40.00 464.00 Td (2. Sprint 1 Acceptance Scope Contract) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 40.00 450.00 Td (In-Scope \(Assessed for Sprint 1 Acceptance\):) Tj ET
+0.120 0.420 0.780 rg 46.40 438.90 3.20 3.20 re f
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 55.00 438.00 Td (Authentication & RBAC:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 156.20 438.00 Td (Borrower login, Custodian login, token issuance \(JWT\), role-based view enforcement, and session termination.) Tj ET
+0.120 0.420 0.780 rg 46.40 426.90 3.20 3.20 re f
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 55.00 426.00 Td (Catalog & Inventory:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 147.00 426.00 Td (Real-time hardware listing, item categories, serial numbers, and availability indicators \(Available vs Checked Out\).) Tj ET
+0.120 0.420 0.780 rg 46.40 414.90 3.20 3.20 re f
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 55.00 414.00 Td (Borrowing Request Workflow:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 179.20 414.00 Td (Borrower submits checkout request for an available lab item; system transitions state from AVAILABLE to REQUESTED.) Tj ET
+0.120 0.420 0.780 rg 46.40 402.90 3.20 3.20 re f
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 55.00 402.00 Td (Inventory Bounds & Exclusivity \(BR-01 / BR-02\):) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 271.20 402.00 Td (Strict rejection when attempting to borrow equipment already requested or on active loan.) Tj ET
+0.120 0.420 0.780 rg 46.40 390.90 3.20 3.20 re f
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 55.00 390.00 Td (Order & Loan Persistence:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 170.00 390.00 Td (Active loans, requests, and item availability persisted durably in Cloud SQL PostgreSQL across page reloads and restarts.) Tj ET
+0.120 0.420 0.780 rg 46.40 378.90 3.20 3.20 re f
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 55.00 378.00 Td (Custodian Dashboard:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 147.00 378.00 Td (Real-time queue intake and status advancement \(REQUESTED -> ACTIVE confirmation checkout\).) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 40.00 364.00 Td (Out-of-Scope \(Not Assessed in Sprint 1\):) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 215.00 364.00 Td (Item returns & check-in condition grading \(Sprint 2 F-03\), due date overdue penalty calculations) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 40.00 353.00 Td (\(Sprint 2 F-04\), and multi-item batch borrowing scanning \(Sprint 3\).) Tj ET
+BT /F2 11.00 Tf 0.120 0.180 0.280 rg 40.00 335.00 Td (3. Safe Synthetic Test Accounts) Tj ET
+0.940 0.960 0.980 rg 0.820 0.860 0.900 RG 0.60 w 40.00 305.00 532.00 18.00 re B
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 46.00 311.00 Td (Account Label) Tj ET
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 122.00 311.00 Td (System Role) Tj ET
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 182.00 311.00 Td (Email Username) Tj ET
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 296.00 311.00 Td (Password) Tj ET
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 368.00 311.00 Td (Key Permitted Operations) Tj ET
+0.820 0.860 0.900 RG 0.60 w 40.00 277.00 532.00 28.00 re S
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 46.00 292.00 Td (Test Custodian) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 122.00 292.00 Td (CUSTODIAN) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 182.00 292.00 Td (custodian@example.com) Tj ET
+BT /F3 8.00 Tf 0.420 0.460 0.520 rg 296.00 292.00 Td (Shared Privately) Tj ET
+BT /F1 7.20 Tf 0.200 0.230 0.280 rg 368.00 293.00 Td (Access Custodian Queue, view pending requests,) Tj ET
+BT /F1 7.20 Tf 0.200 0.230 0.280 rg 368.00 283.00 Td (approve checkouts, and inspect active loans.) Tj ET
+0.820 0.860 0.900 RG 0.60 w 40.00 249.00 532.00 28.00 re S
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 46.00 264.00 Td (Test Borrower 1) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 122.00 264.00 Td (BORROWER) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 182.00 264.00 Td (borrower1@example.com) Tj ET
+BT /F3 8.00 Tf 0.420 0.460 0.520 rg 296.00 264.00 Td (Shared Privately) Tj ET
+BT /F1 7.20 Tf 0.200 0.230 0.280 rg 368.00 265.00 Td (Browse catalog, submit borrow requests,) Tj ET
+BT /F1 7.20 Tf 0.200 0.230 0.280 rg 368.00 255.00 Td (and inspect personal loan history.) Tj ET
+0.820 0.860 0.900 RG 0.60 w 40.00 221.00 532.00 28.00 re S
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 46.00 236.00 Td (Test Borrower 2) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 122.00 236.00 Td (BORROWER) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 182.00 236.00 Td (borrower2@example.com) Tj ET
+BT /F3 8.00 Tf 0.420 0.460 0.520 rg 296.00 236.00 Td (Shared Privately) Tj ET
+BT /F1 7.20 Tf 0.200 0.230 0.280 rg 368.00 237.00 Td (Independent borrower for ownership isolation,) Tj ET
+BT /F1 7.20 Tf 0.200 0.230 0.280 rg 368.00 227.00 Td (privacy boundaries, and exclusivity collisions.) Tj ET
+0.820 0.860 0.900 RG 0.60 w 116.00 323.00 m 116.00 221.00 l S
+0.820 0.860 0.900 RG 0.60 w 176.00 323.00 m 176.00 221.00 l S
+0.820 0.860 0.900 RG 0.60 w 290.00 323.00 m 290.00 221.00 l S
+0.820 0.860 0.900 RG 0.60 w 362.00 323.00 m 362.00 221.00 l S
+0.985 0.992 1.000 rg 0.720 0.820 0.920 RG 0.80 w 40.00 139.00 532.00 70.00 re B
+BT /F2 9.00 Tf 0.120 0.180 0.280 rg 50.00 194.00 Td (Data Baseline, Execution Sequence & Reset Procedure) Tj ET
+0.120 0.420 0.780 rg 50.20 181.20 3.60 3.60 re f
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 59.00 181.00 Td (Pre-seeded Items:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 138.00 181.00 Td (Raspberry Pi 4 \(Available\), Logic Analyzer \(Checked Out\), Digital Storage Oscilloscope \(Available\).) Tj ET
+0.120 0.420 0.780 rg 50.20 168.20 3.60 3.60 re f
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 59.00 168.00 Td (Execution Order:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 134.00 168.00 Td (Execute sequentially UAT-INV-01 -> 02 -> 03 -> 04 -> 05 \(UAT-INV-04 depends on loan in UAT-INV-01\).) Tj ET
+0.120 0.420 0.780 rg 50.20 155.20 3.60 3.60 re f
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 59.00 155.00 Td (Reset / Cleanup:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 132.00 155.00 Td (If database reset is needed, message Product Team \(Team Egoist\) to trigger the 30s Cloud Run re-seed job.) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 5872 >>
+stream
+0.820 0.860 0.900 RG 0.60 w 40.00 36.00 m 572.00 36.00 l S
+BT /F1 8.50 Tf 0.420 0.460 0.520 rg 40.00 24.00 Td (Inventory & Borrowing System - Sprint 1 UAT Handoff Pack) Tj ET
+BT /F1 8.50 Tf 0.420 0.460 0.520 rg 475.00 24.00 Td (Section 31 - Team Egoist) Tj ET
+BT /F1 9.00 Tf 0.420 0.460 0.520 rg 545.00 755.00 Td (2 / 4) Tj ET
+BT /F2 13.00 Tf 0.120 0.180 0.280 rg 40.00 725.00 Td (4. Executable UAT Test Cases) Tj ET
+0.985 0.992 1.000 rg 0.720 0.820 0.920 RG 0.80 w 40.00 388.00 532.00 320.00 re B
+BT /F2 11.00 Tf 0.100 0.150 0.220 rg 50.00 688.00 Td (Case UAT-INV-01: Normal Equipment Request & Custodian Checkout) Tj ET
+BT /F2 8.50 Tf 0.150 0.550 0.350 rg 400.00 688.00 Td (Category 1: Normal Domain Journey) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 50.00 672.00 Td (Sprint 1 Ref:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 112.00 672.00 Td (SRS REQ-02, REQ-03) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 220.00 672.00 Td (|  Role:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 256.00 672.00 Td (BORROWER & CUSTODIAN) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 50.00 658.00 Td (Purpose:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 94.00 658.00 Td (Verify standard borrower request flow and custodian checkout confirmation.) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 50.00 644.00 Td (Preconditions:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 118.00 644.00 Td (Live service online; equipment item Raspberry Pi 4 Model B \(8GB\) is Available.) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 50.00 630.00 Td (Synthetic Inputs:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 130.00 630.00 Td (Item: Raspberry Pi 4 Model B \(8GB\) \(SN: RPI-2026-002\).) Tj ET
+BT /F2 9.00 Tf 0.120 0.180 0.280 rg 50.00 612.00 Td (Step-by-Step Actions:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 56.00 599.00 Td (1. Open https://inventory-service-x6zw5ksjsa-as.a.run.app in Chrome.) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 56.00 586.00 Td (2. Sign in using borrower1@example.com with test credentials.) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 56.00 573.00 Td (3. Under Equipment Catalog, locate Raspberry Pi 4 Model B \(8GB\) and click "Request Borrow".) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 56.00 560.00 Td (4. Verify green toast confirms: "Successfully requested ... Status is REQUESTED, awaiting Custodian checkout approval.") Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 56.00 547.00 Td (5. Verify item appears under My Loan Requests & History with status REQUESTED.) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 56.00 534.00 Td (6. Click Logout, then sign in as Custodian \(custodian@example.com\).) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 56.00 521.00 Td (7. Locate the pending request under Pending Equipment Requests and click "Approve Checkout".) Tj ET
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 50.00 503.00 Td (Expected Result:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 126.00 503.00 Td (Alert confirms checkout. Request moves to Active Checked-Out Equipment with status ACTIVE.) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 50.00 491.00 Td (In Catalog, item availability updates to Checked Out \(red badge\), and the action button becomes disabled.) Tj ET
+0.985 0.992 1.000 rg 0.720 0.820 0.920 RG 0.80 w 40.00 50.00 532.00 320.00 re B
+BT /F2 11.00 Tf 0.100 0.150 0.220 rg 50.00 350.00 Td (Case UAT-INV-02: Boundary Single-Item Exclusivity Enforcement) Tj ET
+BT /F2 8.50 Tf 0.150 0.400 0.750 rg 388.00 350.00 Td (Category 2: Business Rule / Boundary) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 50.00 334.00 Td (Sprint 1 Ref:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 112.00 334.00 Td (SRS BR-01, BR-02) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 210.00 334.00 Td (|  Role:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 246.00 334.00 Td (BORROWER \(borrower1@example.com\)) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 50.00 320.00 Td (Purpose:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 94.00 320.00 Td (Verify database exclusivity limits prevent duplicate checkout when item is already borrowed or pending.) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 50.00 306.00 Td (Preconditions:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 118.00 306.00 Td (Item Logic Analyzer 16 Channel is currently on active loan \(status: Checked Out\).) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 50.00 292.00 Td (Synthetic Inputs:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 130.00 292.00 Td (Item: Logic Analyzer 16 Channel \(SN: LA-2026-003\).) Tj ET
+BT /F2 9.00 Tf 0.120 0.180 0.280 rg 50.00 274.00 Td (Step-by-Step Actions:) Tj ET
+BT /F1 8.20 Tf 0.200 0.230 0.280 rg 56.00 261.50 Td (1. Navigate to Equipment Catalog as borrower1@example.com.) Tj ET
+BT /F1 8.20 Tf 0.200 0.230 0.280 rg 56.00 249.00 Td (2. Locate Logic Analyzer 16 Channel and note status badge Checked Out.) Tj ET
+BT /F1 8.20 Tf 0.200 0.230 0.280 rg 56.00 236.50 Td (3. Inspect the Action column: verify the button is disabled and displays "Unavailable".) Tj ET
+BT /F1 8.20 Tf 0.200 0.230 0.280 rg 56.00 224.00 Td (4. Retrieve JWT token from Chrome DevTools \(F12\) -> Application -> Local Storage -> auth_token.) Tj ET
+BT /F1 8.20 Tf 0.200 0.230 0.280 rg 56.00 211.50 Td (5. Attempt to trigger borrow request via direct API POST call in terminal:) Tj ET
+BT /F3 8.20 Tf 0.200 0.230 0.280 rg 56.00 199.00 Td (    curl -i -X POST https://inventory-service-x6zw5ksjsa-as.a.run.app/api/loans/request \\) Tj ET
+BT /F1 8.20 Tf 0.200 0.230 0.280 rg 56.00 186.50 Td (      -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" -d '{"itemId":"la-2026-003"}') Tj ET
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 50.00 170.50 Td (Expected Result:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 126.00 170.50 Td (System strictly rejects duplicate request. UI button remains disabled.) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 50.00 158.50 Td (API returns HTTP 409 Conflict: "Item is already checked out or has an active request." No duplicate loan record created.) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 11 0 R >>
+endobj
+11 0 obj
+<< /Length 6959 >>
+stream
+0.820 0.860 0.900 RG 0.60 w 40.00 36.00 m 572.00 36.00 l S
+BT /F1 8.50 Tf 0.420 0.460 0.520 rg 40.00 24.00 Td (Inventory & Borrowing System - Sprint 1 UAT Handoff Pack) Tj ET
+BT /F1 8.50 Tf 0.420 0.460 0.520 rg 475.00 24.00 Td (Section 31 - Team Egoist) Tj ET
+BT /F1 9.00 Tf 0.420 0.460 0.520 rg 545.00 755.00 Td (3 / 4) Tj ET
+0.985 0.992 1.000 rg 0.720 0.820 0.920 RG 0.80 w 40.00 495.00 532.00 245.00 re B
+BT /F2 10.50 Tf 0.100 0.150 0.220 rg 50.00 722.00 Td (Case UAT-INV-03: Forbidden Role & Cross-User Ownership Isolation) Tj ET
+BT /F2 8.00 Tf 0.750 0.350 0.100 rg 372.00 722.00 Td (Category 3: Forbidden Role / Ownership) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 708.00 Td (Sprint 1 Ref:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 108.00 708.00 Td (SRS BR-03, NFR-02 | Role: BORROWER 1 & BORROWER 2) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 696.00 Td (Purpose:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 92.00 696.00 Td (Verify borrower cannot access Custodian APIs, and borrower cannot view another borrower's records.) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 684.00 Td (Preconditions:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 114.00 684.00 Td (Borrower logged in with valid JWT token; borrower1 has placed at least one loan.) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 672.00 Td (Synthetic Inputs:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 125.00 672.00 Td (Endpoints: /api/custodian/loans and /api/loans/:id/checkout.) Tj ET
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 50.00 658.00 Td (Step-by-Step Actions:) Tj ET
+BT /F1 7.80 Tf 0.200 0.230 0.280 rg 56.00 646.50 Td (1. Sign in as Borrower \(borrower1@example.com\). Verify Custodian Queue and Approve buttons are not rendered.) Tj ET
+BT /F1 7.80 Tf 0.200 0.230 0.280 rg 56.00 635.00 Td (2. Copy <TOKEN> from Chrome DevTools \(F12\) -> Application -> Local Storage -> auth_token.) Tj ET
+BT /F1 7.80 Tf 0.200 0.230 0.280 rg 56.00 623.50 Td (3. Send unauthorized GET request: curl -i -H "Authorization: Bearer <TOKEN>" https://inventory-service-.../api/custodian/loans) Tj ET
+BT /F1 7.80 Tf 0.200 0.230 0.280 rg 56.00 612.00 Td (4. Send unauthorized POST request: curl -i -X POST -H "Authorization: Bearer <TOKEN>" .../api/loans/test-id/checkout) Tj ET
+BT /F1 7.80 Tf 0.200 0.230 0.280 rg 56.00 600.50 Td (5. Sign out, then sign in as Test Borrower 2 \(borrower2@example.com\) and inspect My Loan Requests & History.) Tj ET
+BT /F2 8.00 Tf 0.120 0.180 0.280 rg 50.00 586.50 Td (Expected Result:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 122.00 586.50 Td (Server strictly returns HTTP 403 Forbidden \({"success":false,"error":{"code":"AUTH_FORBIDDEN"}}\).) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 50.00 576.50 Td (Custodian data is never exposed. Borrower 2's loan table is completely isolated and displays no records from Borrower 1.) Tj ET
+0.985 0.992 1.000 rg 0.720 0.820 0.920 RG 0.80 w 40.00 276.00 532.00 205.00 re B
+BT /F2 10.50 Tf 0.100 0.150 0.220 rg 50.00 463.00 Td (Case UAT-INV-04: Loan State Persistence Across Session Reload) Tj ET
+BT /F2 8.00 Tf 0.150 0.550 0.350 rg 398.00 463.00 Td (Category 4: State / Persistence) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 449.00 Td (Sprint 1 Ref:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 108.00 449.00 Td (SRS REQ-04 | Role: BORROWER \(borrower1@example.com\)) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 437.00 Td (Purpose:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 92.00 437.00 Td (Verify requested/active loans persist durably in Cloud SQL PostgreSQL across session logout and reload.) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 425.00 Td (Preconditions:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 114.00 425.00 Td (At least one active/requested loan exists from Case UAT-INV-01 \(Execute after UAT-INV-01\).) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 413.00 Td (Synthetic Inputs:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 125.00 413.00 Td (Action: Hard reload \(Cmd+Shift+R / Ctrl+F5\) and re-authentication.) Tj ET
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 50.00 399.00 Td (Step-by-Step Actions:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 56.00 387.50 Td (1. In the top navigation header, click "Logout" button.) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 56.00 376.00 Td (2. Perform a hard browser reload \(Cmd + Shift + R or Ctrl + F5\).) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 56.00 364.50 Td (3. Sign back in using borrower1@example.com.) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 56.00 353.00 Td (4. Inspect the My Loan Requests & History table.) Tj ET
+BT /F2 8.00 Tf 0.120 0.180 0.280 rg 50.00 339.00 Td (Expected Result:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 122.00 339.00 Td (Previously placed loan records remain intact with identical Loan ID, item title, serial number, submission) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 50.00 329.00 Td (timestamp, and status. Data is preserved across container restarts and page reloads.) Tj ET
+0.985 0.992 1.000 rg 0.720 0.820 0.920 RG 0.80 w 40.00 67.00 532.00 195.00 re B
+BT /F2 10.50 Tf 0.100 0.150 0.220 rg 50.00 244.00 Td (Case UAT-INV-05: Custodian Queue Intake & State Advancement) Tj ET
+BT /F2 8.00 Tf 0.150 0.400 0.750 rg 398.00 244.00 Td (Domain State Machine Journey) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 230.00 Td (Sprint 1 Ref:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 108.00 230.00 Td (SRS REQ-03, AC-12 | Role: CUSTODIAN \(custodian@example.com\)) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 218.00 Td (Purpose:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 92.00 218.00 Td (Verify Custodian can review incoming loan requests and advance state from REQUESTED to ACTIVE.) Tj ET
+BT /F2 8.00 Tf 0.200 0.230 0.280 rg 50.00 206.00 Td (Preconditions:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 114.00 206.00 Td (An equipment request exists in REQUESTED status.) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 50.00 194.00 Td (Synthetic Inputs:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 125.00 194.00 Td (Action: Custodian clicks "Approve Checkout".) Tj ET
+BT /F2 8.50 Tf 0.120 0.180 0.280 rg 50.00 180.00 Td (Step-by-Step Actions:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 56.00 168.50 Td (1. Sign in using custodian@example.com with test credentials.) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 56.00 157.00 Td (2. Verify the Pending Equipment Requests dashboard displays pending counter.) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 56.00 145.50 Td (3. Locate the pending request and click "Approve Checkout" button.) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 56.00 134.00 Td (4. Sign back in as Borrower \(borrower1@example.com\) and inspect My Loan Requests & History.) Tj ET
+BT /F2 8.00 Tf 0.120 0.180 0.280 rg 50.00 120.00 Td (Expected Result:) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 122.00 120.00 Td (In Custodian view, toast confirms approval and item moves to Active Checked-Out Equipment.) Tj ET
+BT /F1 8.00 Tf 0.200 0.230 0.280 rg 50.00 110.00 Td (In Borrower view, loan status reflects ACTIVE in real time.) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 13 0 R >>
+endobj
+13 0 obj
+<< /Length 4295 >>
+stream
+0.820 0.860 0.900 RG 0.60 w 40.00 36.00 m 572.00 36.00 l S
+BT /F1 8.50 Tf 0.420 0.460 0.520 rg 40.00 24.00 Td (Inventory & Borrowing System - Sprint 1 UAT Handoff Pack) Tj ET
+BT /F1 8.50 Tf 0.420 0.460 0.520 rg 475.00 24.00 Td (Section 31 - Team Egoist) Tj ET
+BT /F1 9.00 Tf 0.420 0.460 0.520 rg 545.00 755.00 Td (4 / 4) Tj ET
+BT /F2 12.00 Tf 0.120 0.180 0.280 rg 40.00 725.00 Td (5. How to Report Defects \(For UAT Partner Team\)) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 40.00 705.00 Td (If you encounter unexpected behavior, please log a defect on our GitHub repository:) Tj ET
+BT /F2 8.50 Tf 0.120 0.420 0.780 rg 46.00 690.00 Td (-) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 54.00 690.00 Td (Defect Submission URL:) Tj ET
+BT /F1 8.50 Tf 0.120 0.420 0.780 rg 168.00 690.00 Td (https://github.com/LiNkPaWaRuT/inventory-borrowing-system/issues/new) Tj ET
+BT /F2 8.50 Tf 0.120 0.420 0.780 rg 46.00 676.00 Td (-) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 54.00 676.00 Td (Title Format:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 118.00 676.00 Td ([UAT Defect] <Short Summary> \(with label defect or lab6\)) Tj ET
+BT /F2 8.50 Tf 0.120 0.420 0.780 rg 46.00 662.00 Td (-) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 54.00 662.00 Td (Required Information:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 158.00 662.00 Td (Linked Case ID, Reporter Name/Team, Steps to Reproduce, Expected vs Actual Result,) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 54.00 651.00 Td (Severity \(Critical / Major / Minor\), and Screenshot/Logs.) Tj ET
+BT /F2 12.00 Tf 0.120 0.180 0.280 rg 40.00 621.00 Td (6. Official Sprint 1 UAT Acceptance Sign-Off Template) Tj ET
+0.985 0.992 1.000 rg 0.720 0.820 0.920 RG 1.00 w 40.00 187.00 532.00 420.00 re B
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 52.00 583.00 Td (Product Name:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 125.00 583.00 Td (Inventory & Borrowing System) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 260.00 583.00 Td (-  Product Team:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 342.00 583.00 Td (Section 31, Team Egoist \(Pawarut & Kawinpob\)) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 52.00 567.00 Td (Tested Release Commit:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 165.00 567.00 Td (f89023add2051fb64c5f241663037dd8d0ee91de \(Release v1.0-cloud / short f89023a\)) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 52.00 551.00 Td (Live Cloud URL:) Tj ET
+BT /F1 8.50 Tf 0.120 0.420 0.780 rg 130.00 551.00 Td (https://inventory-service-x6zw5ksjsa-as.a.run.app) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 52.00 526.00 Td (UAT Testing Team:) Tj ET
+0.820 0.860 0.900 RG 0.80 w 145.00 524.00 m 550.00 524.00 l S
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 52.00 504.00 Td (Lead UAT Testers:) Tj ET
+0.820 0.860 0.900 RG 0.80 w 145.00 502.00 m 380.00 502.00 l S
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 395.00 504.00 Td (-  Date:) Tj ET
+0.820 0.860 0.900 RG 0.80 w 440.00 502.00 m 550.00 502.00 l S
+BT /F2 9.00 Tf 0.120 0.180 0.280 rg 52.00 474.00 Td (Final UAT Decision \(Select One\):) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 60.00 456.00 Td ([  ]  ACCEPTED:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 133.50 456.00 Td (All critical and major UAT cases pass cleanly without blocking defects.) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 60.00 438.00 Td ([  ]  ACCEPTED WITH MINOR LIMITATIONS:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 246.20 438.00 Td (Core journeys pass; minor non-blocking issues noted.) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 60.00 420.00 Td ([  ]  NOT ACCEPTED:) Tj ET
+BT /F1 8.50 Tf 0.200 0.230 0.280 rg 153.10 420.00 Td (Critical defects remain unresolved or required test journeys fail.) Tj ET
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 52.00 390.00 Td (UAT Sign-off Notes & Findings:) Tj ET
+0.820 0.860 0.900 RG 0.80 w 195.00 388.00 m 550.00 388.00 l S
+0.820 0.860 0.900 RG 0.80 w 52.00 368.00 m 550.00 368.00 l S
+0.820 0.860 0.900 RG 0.80 w 52.00 348.00 m 550.00 348.00 l S
+0.820 0.860 0.900 RG 0.80 w 52.00 328.00 m 550.00 328.00 l S
+0.820 0.860 0.900 RG 0.80 w 52.00 308.00 m 550.00 308.00 l S
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 52.00 275.00 Td (Independent Tester Signature:) Tj ET
+0.820 0.860 0.900 RG 0.80 w 195.00 273.00 m 380.00 273.00 l S
+BT /F2 8.50 Tf 0.200 0.230 0.280 rg 395.00 275.00 Td (-  Date:) Tj ET
+0.820 0.860 0.900 RG 0.80 w 440.00 273.00 m 550.00 273.00 l S
+endstream
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000135 00000 n 
+0000000232 00000 n 
+0000000334 00000 n 
+0000000439 00000 n 
+0000000585 00000 n 
+0000010190 00000 n 
+0000010336 00000 n 
+0000016260 00000 n 
+0000016408 00000 n 
+0000023420 00000 n 
+0000023568 00000 n 
+trailer
+<< /Size 14 /Root 1 0 R >>
+startxref
+27916
+%%EOF
