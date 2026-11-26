@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/src/app.js';
 import { prisma } from '../server/src/prisma.js';
@@ -31,23 +31,10 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
       .send({ email: 'custodian@example.com', password: 'Password123!' });
     custodianToken = cRes.body.token;
 
-    // Clean previous test-created loans to ensure clean test state
-    await prisma.loan.deleteMany({});
-
-    // Reset base items
-    await prisma.item.updateMany({
-      where: { serialNumber: { in: ['OSC-2026-001', 'RPI-2026-002'] } },
-      data: { isAvailable: true }
-    });
-
     const unavailable = await prisma.item.findUnique({
       where: { serialNumber: 'LA-2026-003' }
     });
     if (unavailable) {
-      await prisma.item.update({
-        where: { id: unavailable.id },
-        data: { isAvailable: false }
-      });
       unavailableItem = unavailable;
     }
 
@@ -56,6 +43,21 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
     });
     if (available) {
       availableItem = available;
+    }
+  });
+
+  beforeEach(async () => {
+    // Reset loans and item states before each test so each starts with a clean quota state
+    await prisma.loan.deleteMany({});
+    await prisma.item.updateMany({
+      where: { serialNumber: { in: ['OSC-2026-001', 'RPI-2026-002'] } },
+      data: { isAvailable: true }
+    });
+    if (unavailableItem) {
+      await prisma.item.update({
+        where: { id: unavailableItem.id },
+        data: { isAvailable: false }
+      });
     }
   });
 
@@ -257,5 +259,85 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
     // Reproduce DEF-01: Expect item to have a distinct catalogStatus = 'PENDING_APPROVAL' or status = 'REQUESTED'
     // This will FAIL on current implementation because /api/items does not yet provide catalogStatus
     expect(targetItem.catalogStatus).toBe('PENDING_APPROVAL');
+  });
+
+  // TEST-L7-01: Boundary Verification for Borrower 2-Loan Quota (BR-04, AC-13, AC-14)
+  it('TEST-L7-01: should allow up to 2 concurrent loans (REQUESTED or ACTIVE) and reject 3rd request with 409 LOAN_LIMIT_EXCEEDED (RED phase)', async () => {
+    // 1. Precondition: Ensure borrower2 starts with 0 active/pending loans
+    const b2User = await prisma.user.findUnique({ where: { email: 'borrower2@example.com' } });
+    expect(b2User).not.toBeNull();
+    await prisma.loan.deleteMany({ where: { borrowerId: b2User!.id } });
+
+    // 2. Precondition: Create 3 distinct available hardware items
+    const itemA = await prisma.item.create({
+      data: {
+        title: 'FPGA Cyclone IV Dev Kit',
+        serialNumber: `FPGA-${Date.now()}-A`,
+        category: 'Digital Systems',
+        isAvailable: true
+      }
+    });
+    const itemB = await prisma.item.create({
+      data: {
+        title: 'ARM Cortex-M4 Kit',
+        serialNumber: `ARM-${Date.now()}-B`,
+        category: 'Embedded Systems',
+        isAvailable: true
+      }
+    });
+    const itemC = await prisma.item.create({
+      data: {
+        title: 'HackRF One SDR Transceiver',
+        serialNumber: `SDR-${Date.now()}-C`,
+        category: 'RF & Wireless',
+        isAvailable: true
+      }
+    });
+
+    // Step 1: 1st borrow request (Boundary count: 0 -> 1) -> Must succeed with 201 Created (AC-13)
+    const res1 = await request(app)
+      .post('/api/loans/request')
+      .set('Authorization', `Bearer ${borrower2Token}`)
+      .send({ itemId: itemA.id });
+
+    expect(res1.status).toBe(201);
+    expect(res1.body.success).toBe(true);
+    expect(res1.body.loan.status).toBe('REQUESTED');
+
+    // Step 2: 2nd borrow request (Boundary count: 1 -> 2) -> Must succeed with 201 Created (AC-13)
+    const res2 = await request(app)
+      .post('/api/loans/request')
+      .set('Authorization', `Bearer ${borrower2Token}`)
+      .send({ itemId: itemB.id });
+
+    expect(res2.status).toBe(201);
+    expect(res2.body.success).toBe(true);
+    expect(res2.body.loan.status).toBe('REQUESTED');
+
+    // Step 3: 3rd borrow request (Boundary exceeded: 2 -> 3) -> Must reject with 409 Conflict (AC-14)
+    const res3 = await request(app)
+      .post('/api/loans/request')
+      .set('Authorization', `Bearer ${borrower2Token}`)
+      .send({ itemId: itemC.id });
+
+    // Under pre-change code (6a19bd1 / f26e202), this will FAIL (RED) because no quota check exists (returns 201)
+    expect(res3.status).toBe(409);
+    expect(res3.body.error).toBe('LOAN_LIMIT_EXCEEDED');
+    expect(res3.body.message).toContain('limit of 2 concurrent loans');
+
+    // Step 4: Verify state integrity - Item C has no persisted loan record
+    const itemCLoan = await prisma.loan.findFirst({
+      where: { itemId: itemC.id }
+    });
+    expect(itemCLoan).toBeNull();
+
+    // Verify borrower2 holds exactly 2 active/pending loans in database
+    const b2Loans = await prisma.loan.findMany({
+      where: {
+        borrowerId: b2User!.id,
+        status: { in: ['REQUESTED', 'ACTIVE'] }
+      }
+    });
+    expect(b2Loans.length).toBe(2);
   });
 });

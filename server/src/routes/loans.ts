@@ -39,6 +39,22 @@ router.post('/request', requireAuth, requireRole('BORROWER'), async (req: Authen
       });
     }
 
+    // BR-04 (Per-Borrower Concurrent Loan Quota): Reject if borrower holds >= 2 REQUESTED or ACTIVE loans
+    const activeLoanCount = await prisma.loan.count({
+      where: {
+        borrowerId: req.user!.userId,
+        status: { in: ['REQUESTED', 'ACTIVE'] }
+      }
+    });
+
+    if (activeLoanCount >= 2) {
+      return res.status(409).json({
+        success: false,
+        error: 'LOAN_LIMIT_EXCEEDED',
+        message: 'Borrower has reached the maximum limit of 2 concurrent loans (pending or active).'
+      });
+    }
+
     // BR-02 (No Duplicate Active Loans): Reject if there is already an active or requested loan
     const existingLoan = await prisma.loan.findFirst({
       where: {
