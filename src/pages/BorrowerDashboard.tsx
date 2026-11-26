@@ -68,7 +68,7 @@ export const BorrowerDashboard: React.FC = () => {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error?.message || 'Failed to request borrow.');
+        throw new Error(data.message || data.error?.message || (typeof data.error === 'string' ? data.error : 'Failed to request borrow.'));
       }
 
       setFeedback({
@@ -85,6 +85,11 @@ export const BorrowerDashboard: React.FC = () => {
       setSubmittingItemId(null);
     }
   };
+
+  const activeLoanCount = myLoans.filter(
+    (loan) => loan.status === 'REQUESTED' || loan.status === 'ACTIVE'
+  ).length;
+  const isQuotaReached = activeLoanCount >= 2;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
@@ -107,9 +112,24 @@ export const BorrowerDashboard: React.FC = () => {
       <section style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '18px', color: '#1e293b' }}>📦 Equipment Catalog</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2 style={{ margin: 0, fontSize: '18px', color: '#1e293b' }}>📦 Equipment Catalog</h2>
+              <span
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  background: isQuotaReached ? '#fee2e2' : '#e0f2fe',
+                  color: isQuotaReached ? '#991b1b' : '#0369a1',
+                  border: `1px solid ${isQuotaReached ? '#fca5a5' : '#bae6fd'}`
+                }}
+              >
+                Active Quota: {activeLoanCount} / 2
+              </span>
+            </div>
             <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
-              Browse department lab hardware and request items for checkout.
+              Browse department lab hardware and request items for checkout (max 2 concurrent loans).
             </p>
           </div>
           <button
@@ -126,6 +146,28 @@ export const BorrowerDashboard: React.FC = () => {
             Refresh Catalog
           </button>
         </div>
+
+        {isQuotaReached && (
+          <div
+            style={{
+              marginBottom: '16px',
+              padding: '10px 14px',
+              borderRadius: '6px',
+              background: '#fffbeb',
+              border: '1px solid #fef3c7',
+              color: '#92400e',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <span>⚠️</span>
+            <span>
+              <strong>Loan Limit Reached (2/2):</strong> You currently hold the maximum allowed concurrent loans (requested or active). Return an existing item or await custodian check-in before requesting more equipment.
+            </span>
+          </div>
+        )}
 
         {loading ? (
           <p style={{ color: '#64748b', fontSize: '14px' }}>Loading catalog...</p>
@@ -179,20 +221,23 @@ export const BorrowerDashboard: React.FC = () => {
                     <td style={{ padding: '12px', textAlign: 'right' }}>
                       <button
                         onClick={() => handleRequestBorrow(item.id, item.title)}
-                        disabled={!item.isAvailable || submittingItemId === item.id}
+                        disabled={!item.isAvailable || submittingItemId === item.id || isQuotaReached}
+                        title={isQuotaReached ? 'Loan quota reached (max 2 concurrent loans)' : undefined}
                         style={{
                           padding: '6px 14px',
                           fontSize: '13px',
                           fontWeight: 600,
                           borderRadius: '6px',
                           border: 'none',
-                          cursor: !item.isAvailable || submittingItemId === item.id ? 'not-allowed' : 'pointer',
-                          background: item.isAvailable ? '#2563eb' : '#cbd5e1',
-                          color: item.isAvailable ? '#fff' : '#64748b'
+                          cursor: !item.isAvailable || submittingItemId === item.id || isQuotaReached ? 'not-allowed' : 'pointer',
+                          background: isQuotaReached ? '#94a3b8' : item.isAvailable ? '#2563eb' : '#cbd5e1',
+                          color: isQuotaReached ? '#f1f5f9' : item.isAvailable ? '#fff' : '#64748b'
                         }}
                       >
                         {submittingItemId === item.id
                           ? 'Requesting...'
+                          : isQuotaReached
+                          ? 'Limit Reached'
                           : item.isAvailable
                           ? 'Request Borrow'
                           : 'Unavailable'}
