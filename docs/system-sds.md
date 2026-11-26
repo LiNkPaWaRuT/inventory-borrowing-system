@@ -101,7 +101,7 @@ erDiagram
 | **Authenticate** | `/api/auth/login` | POST | Allowed | Allowed | Valid credentials |
 | **Current User** | `/api/auth/me` | GET | Allowed | Allowed | Token required |
 | **View Catalog** | `/api/items` | GET | Allowed | Allowed | Any authenticated user |
-| **Request Loan** | `/api/loans/request` | POST | **Allowed** | Denied | `item.isAvailable == true` |
+| **Request Loan** | `/api/loans/request` | POST | **Allowed** | Denied | `item.isAvailable == true`, `BR-01`, `BR-02`, `BR-04` (max 2 active loans) |
 | **View My Loans**| `/api/loans/my-loans`| GET | **Allowed** | Allowed | Borrower sees only own records |
 | **View All Loans**| `/api/custodian/loans`| GET | **Forbidden (403)** | **Allowed** | Restricted to Custodian |
 | **Record Checkout**| `/api/loans/:id/checkout`| POST | **Forbidden (403)** | **Allowed** | Item must be available; transitions to `ACTIVE` |
@@ -117,6 +117,20 @@ All API errors return consistent JSON:
   }
 }
 ```
+
+For loan quota violations (`BR-04`), `POST /api/loans/request` returns `HTTP 409 Conflict`:
+```json
+{
+  "error": "LOAN_LIMIT_EXCEEDED",
+  "message": "Borrower has reached the maximum limit of 2 concurrent loans (pending or active)."
+}
+```
+
+### 3.4 Borrower Dashboard UI Quota Integration
+In `BorrowerDashboard.tsx`:
+- The client counts active loans where `loan.status === 'REQUESTED' || loan.status === 'ACTIVE'`.
+- The UI renders an active quota indicator badge: `Active Loans: {activeLoanCount} / 2`.
+- When an attempt to borrow returns `409` with error `LOAN_LIMIT_EXCEEDED`, the UI displays a dismissible warning alert advising the borrower to await Custodian check-in or return existing equipment.
 
 ---
 

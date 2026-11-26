@@ -14,7 +14,8 @@ This matrix establishes complete traceability from Baseline Requirements (FR, BR
 | **BR-01** | Single-item exclusivity (no double-book) | `F-02` | Item Catalog & Request | Sprint 1 | `AC-09` | `TEST-LOAN-02` | Automated API (Supertest) |
 | **BR-02** | Prevent duplicate active loans for item | `F-02` | Item Catalog & Request | Sprint 1 | `AC-10` | `TEST-LOAN-02` | Automated API (Supertest) |
 | **BR-03** | Role segregation (Custodian only checkout)| `F-01`, `F-02` | Auth & Loan Workflow | Sprint 1 | `AC-05` | `TEST-LOAN-04` | Automated API (Supertest) |
-| **BR-04** | Ownership isolation (cross-borrower block)| `F-02` | Item Catalog & Request | Sprint 1 | `AC-11` | `TEST-LOAN-05` | Automated API (Supertest) |
+| **BR-04** | Per-borrower concurrent loan quota (max 2)| `F-02` | Loan Request Lifecycle | Lab 7 (Maint) | `AC-13`, `AC-14` | `TEST-L7-01` | Automated API Integration Test |
+| **BR-05** | Ownership isolation (cross-borrower block)| `F-02` | Item Catalog & Request | Sprint 1 | `AC-11` | `TEST-LOAN-05` | Automated API (Supertest) |
 | **NFR-01** | Passwords hashed using bcrypt | `F-01` | Auth & Access Control | Sprint 1 | `AC-06` | `TEST-AUTH-05` | Automated Unit Test (Prisma seed/hash) |
 | **NFR-02** | Protected routes reject unauthenticated | `F-01` | Auth & Access Control | Sprint 1 | `AC-04` | `TEST-AUTH-03` | Automated API (Supertest) |
 | **NFR-03** | API responses within 300ms | `F-01`, `F-02` | System Baseline | Sprint 1 | `AC-01`, `AC-08` | `TEST-PERF-01` | Automated Benchmark / Test suite timing |
@@ -23,3 +24,25 @@ This matrix establishes complete traceability from Baseline Requirements (FR, BR
 | **FR-10** | Item search and category filtering | `F-05` | Catalog Search & Filter | Sprint 2 | `AC-17` | TBD (Sprint 2) | React UI + API query |
 | **FR-11** | Audit log & inventory reporting export | `F-06` | Inventory Reporting | Sprint 3 | `AC-18` | TBD (Sprint 3) | Automated System Test |
 | **FR-12** | Multi-item request batching | `F-07` | Batch Requests | Sprint 3 | `AC-19` | TBD (Sprint 3) | Automated API + UI |
+
+---
+
+## Software Test Specification (STS) - Maintenance Addendum
+
+### TEST-L7-01: Boundary Verification for Borrower 2-Loan Quota
+- **Target Requirements:** `BR-04`, `AC-13`, `AC-14`
+- **Execution Engine:** Vitest + Supertest
+- **Preconditions:**
+  1. Authenticated as synthetic borrower (`borrower1@example.com`).
+  2. Database contains at least 3 distinct available inventory items (Item A, Item B, Item C).
+  3. Borrower currently holds 0 active or pending loans.
+- **Test Steps & Assertions:**
+  1. **Boundary Count 0 -> 1:** Send `POST /api/loans/request` for Item A.
+     - Expected: HTTP `201 Created`, loan record created with status `REQUESTED` (`AC-13`).
+  2. **Boundary Count 1 -> 2:** Send `POST /api/loans/request` for Item B.
+     - Expected: HTTP `201 Created`, loan record created with status `REQUESTED` (`AC-13`).
+  3. **Boundary Exceeded Count 2 -> 3:** Send `POST /api/loans/request` for Item C.
+     - Expected: HTTP `409 Conflict`, JSON response `{"error": "LOAN_LIMIT_EXCEEDED", "message": "Borrower has reached the maximum limit of 2 concurrent loans (pending or active)."}` (`AC-14`).
+  4. **State Integrity Verification:**
+     - Query database for loans of Item C $\to$ assert no loan record exists.
+     - Query borrower's loans $\to$ assert total active/pending loan count remains strictly 2.
