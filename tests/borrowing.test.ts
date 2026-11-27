@@ -481,4 +481,130 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
       .send({ conditionGrade: 'GOOD' });
     expect(borrowerRes.status).toBe(403);
   });
+
+  // =========================================================================
+  // Sprint 2 Feature F-04: Loan Due Dates & Overdue Penalty Engine
+  // =========================================================================
+
+  // TEST-DUE-01: Due Date Assignment upon Checkout (Sprint 2 / F-04) [FR-09, AC-18]
+  it('TEST-DUE-01: Custodian checkout assigns dueAt exactly 7 calendar days from checkout (F-04)', async () => {
+    // 1. Setup: Create available item and request it
+    const item = await prisma.item.create({
+      data: {
+        title: 'Arbitrary Waveform Generator 25MHz',
+        serialNumber: `AWG-${Date.now()}-1`,
+        category: 'Signal Generators',
+        isAvailable: true
+      }
+    });
+
+    const reqRes = await request(app)
+      .post('/api/loans/request')
+      .set('Authorization', `Bearer ${borrower1Token}`)
+      .send({ itemId: item.id });
+    const loanId = reqRes.body.loan.id;
+
+    // 2. Action: Custodian checks out item
+    const checkoutTime = new Date();
+    const checkoutRes = await request(app)
+      .post(`/api/loans/${loanId}/checkout`)
+      .set('Authorization', `Bearer ${custodianToken}`);
+
+    expect(checkoutRes.status).toBe(200);
+    expect(checkoutRes.body.loan.dueAt).toBeDefined();
+
+    // 3. Assertion: dueAt must be ~7 days (168 hours) after checkout
+    const dueAt = new Date(checkoutRes.body.loan.dueAt);
+    const expectedDueAt = new Date(checkoutTime.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const diffHours = Math.abs((dueAt.getTime() - expectedDueAt.getTime()) / (1000 * 60 * 60));
+    expect(diffHours).toBeLessThan(1); // Within 1 hour tolerance
+  });
+
+  // TEST-DUE-02: Overdue Status Detection & Accrued Fine Calculation (Sprint 2 / F-04) [FR-09, BR-08, AC-19]
+  it('TEST-DUE-02: Accrues $5.00/day fine for loans past dueAt and reports OVERDUE status (F-04)', async () => {
+    // 1. Setup: Create item and simulate an active loan that was due 3 days ago
+    const item = await prisma.item.create({
+      data: {
+        title: 'Thermal Imaging Camera FLIR E4',
+        serialNumber: `FLIR-${Date.now()}-2`,
+        category: 'Thermal Imaging',
+        isAvailable: false
+      }
+    });
+
+    const b1User = await prisma.user.findUnique({ where: { email: 'borrower1@example.com' } });
+    const pastDueAt = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000); // 3 days overdue
+    const checkedOutAt = new Date(pastDueAt.getTime() - 7 * 24 * 60 * 60 * 1000); // Checked out 10 days ago
+
+    const pastLoan = await prisma.loan.create({
+      data: {
+        itemId: item.id,
+        borrowerId: b1User!.id,
+        status: 'ACTIVE',
+        checkedOutAt,
+        dueAt: pastDueAt
+      }
+    });
+
+    // 2. Action: Borrower inspects personal loans
+    const loansRes = await request(app)
+      .get('/api/loans/my-loans')
+      .set('Authorization', `Bearer ${borrower1Token}`);
+
+    expect(loansRes.status).toBe(200);
+    const inspectedLoan = loansRes.body.loans.find((l: any) => l.id === pastLoan.id);
+    expect(inspectedLoan).toBeDefined();
+
+    // 3. Assertion: Status should flag as OVERDUE and accrued fine should be exactly 3 days * $5 = $15.00
+    expect(inspectedLoan.isOverdue).toBe(true);
+    expect(inspectedLoan.daysOverdue).toBe(3);
+    expect(inspectedLoan.accruedFine).toBe(15.0);
+  });
+
+  // TEST-DUE-03: Overdue Loan Return Finalizes Accrued Fine (Sprint 2 / F-04) [FR-08, FR-09, AC-15, AC-19]
+  it('TEST-DUE-03: Returning an overdue loan records the final penaltyFine and restores item availability (F-04)', async () => {
+    // 1. Setup: Create item and an overdue active loan (2 days overdue)
+    const item = await prisma.item.create({
+      data: {
+        title: 'Soldering Workstation 80W',
+        serialNumber: `SLD-${Date.now()}-3`,
+        category: 'Soldering & Rework',
+        isAvailable: false
+      }
+    });
+
+    const b2User = await prisma.user.findUnique({ where: { email: 'borrower2@example.com' } });
+    const pastDueAt = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000); // 2 days overdue
+
+    const overdueLoan = await prisma.loan.create({
+      data: {
+        itemId: item.id,
+        borrowerId: b2User!.id,
+        status: 'ACTIVE',
+        checkedOutAt: new Date(pastDueAt.getTime() - 7 * 24 * 60 * 60 * 1000),
+        dueAt: pastDueAt
+      }
+    });
+
+    // 2. Action: Custodian checks in the overdue loan with GOOD condition
+    const returnRes = await request(app)
+      .post(`/api/loans/${overdueLoan.id}/return`)
+      .set('Authorization', `Bearer ${custodianToken}`)
+      .send({
+        conditionGrade: 'GOOD',
+        returnNotes: 'Returned late but equipment in perfect shape.'
+      });
+
+    expect(returnRes.status).toBe(200);
+    expect(returnRes.body.loan.status).toBe('RETURNED');
+    expect(returnRes.body.loan.penaltyFine).toBe(10.0); // 2 days * $5.00 = $10.00
+
+    // 3. Assertion: Item availability restored and persistence verified in DB
+    const dbLoan = await prisma.loan.findUnique({ where: { id: overdueLoan.id } });
+    expect(dbLoan?.penaltyFine).toBe(10.0);
+    expect(dbLoan?.returnedAt).toBeDefined();
+
+    const dbItem = await prisma.item.findUnique({ where: { id: item.id } });
+    expect(dbItem?.isAvailable).toBe(true);
+  });
 });
