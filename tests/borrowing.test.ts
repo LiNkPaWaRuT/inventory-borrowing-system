@@ -340,4 +340,145 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
     });
     expect(b2Loans.length).toBe(2);
   });
+
+  // TEST-RET-01: Equipment Return with GOOD/FAIR Condition (Sprint 2 / F-03) [FR-08, BR-06, AC-15]
+  it('TEST-RET-01: Custodian check-in with GOOD condition restores item availability and frees quota (F-03)', async () => {
+    // 1. Setup: Create available item, request it, and check it out to ACTIVE state
+    const item = await prisma.item.create({
+      data: {
+        title: 'Oscilloscope Probe Kit 100MHz',
+        serialNumber: `PRB-${Date.now()}-1`,
+        category: 'Probes & Accessories',
+        isAvailable: true
+      }
+    });
+
+    const reqRes = await request(app)
+      .post('/api/loans/request')
+      .set('Authorization', `Bearer ${borrower1Token}`)
+      .send({ itemId: item.id });
+    const loanId = reqRes.body.loan.id;
+
+    await request(app)
+      .post(`/api/loans/${loanId}/checkout`)
+      .set('Authorization', `Bearer ${custodianToken}`);
+
+    // Verify precondition: Loan is ACTIVE, item is unavailable
+    const activeLoan = await prisma.loan.findUnique({ where: { id: loanId } });
+    expect(activeLoan?.status).toBe('ACTIVE');
+
+    // 2. Action: Custodian returns equipment with GOOD condition
+    const returnRes = await request(app)
+      .post(`/api/loans/${loanId}/return`)
+      .set('Authorization', `Bearer ${custodianToken}`)
+      .send({
+        conditionGrade: 'GOOD',
+        returnNotes: 'Returned in full working condition with all accessories.'
+      });
+
+    expect(returnRes.status).toBe(200);
+    expect(returnRes.body.success).toBe(true);
+    expect(returnRes.body.loan.status).toBe('RETURNED');
+    expect(returnRes.body.loan.conditionGrade).toBe('GOOD');
+
+    // 3. Verify DB persistence: item isAvailable is restored to true
+    const updatedItem = await prisma.item.findUnique({ where: { id: item.id } });
+    expect(updatedItem?.isAvailable).toBe(true);
+
+    // 4. Verify borrower quota is freed (0 active/requested loans remaining)
+    const b1User = await prisma.user.findUnique({ where: { email: 'borrower1@example.com' } });
+    const activeLoans = await prisma.loan.count({
+      where: {
+        borrowerId: b1User!.id,
+        status: { in: ['REQUESTED', 'ACTIVE'] }
+      }
+    });
+    expect(activeLoans).toBe(0);
+  });
+
+  // TEST-RET-02: Equipment Return with DAMAGED Condition Quarantine (Sprint 2 / F-03) [FR-08, BR-07, AC-16]
+  it('TEST-RET-02: Custodian check-in with DAMAGED condition quarantines item in MAINTENANCE (F-03)', async () => {
+    // 1. Setup: Create available item, request it, and check it out to ACTIVE state
+    const item = await prisma.item.create({
+      data: {
+        title: 'Precision Benchtop Power Supply',
+        serialNumber: `PWR-${Date.now()}-2`,
+        category: 'Power Equipment',
+        isAvailable: true
+      }
+    });
+
+    const reqRes = await request(app)
+      .post('/api/loans/request')
+      .set('Authorization', `Bearer ${borrower1Token}`)
+      .send({ itemId: item.id });
+    const loanId = reqRes.body.loan.id;
+
+    await request(app)
+      .post(`/api/loans/${loanId}/checkout`)
+      .set('Authorization', `Bearer ${custodianToken}`);
+
+    // 2. Action: Custodian returns equipment with DAMAGED condition
+    const returnRes = await request(app)
+      .post(`/api/loans/${loanId}/return`)
+      .set('Authorization', `Bearer ${custodianToken}`)
+      .send({
+        conditionGrade: 'DAMAGED',
+        returnNotes: 'Output channel 2 voltage regulation erratic; requires calibration.'
+      });
+
+    expect(returnRes.status).toBe(200);
+    expect(returnRes.body.success).toBe(true);
+    expect(returnRes.body.loan.status).toBe('RETURNED');
+    expect(returnRes.body.loan.conditionGrade).toBe('DAMAGED');
+
+    // 3. Verify DB persistence: item isAvailable remains false and item status is MAINTENANCE
+    const updatedItem = await prisma.item.findUnique({ where: { id: item.id } });
+    expect(updatedItem?.isAvailable).toBe(false);
+
+    // 4. Verify another borrower cannot request this damaged item (409 Conflict)
+    const attemptRes = await request(app)
+      .post('/api/loans/request')
+      .set('Authorization', `Bearer ${borrower2Token}`)
+      .send({ itemId: item.id });
+    expect(attemptRes.status).toBe(409);
+  });
+
+  // TEST-RET-03: Security & Validation Guardrails (Sprint 2 / F-03) [BR-06, AC-17]
+  it('TEST-RET-03: Rejects borrower return with 403 Forbidden and non-active loan return with 409 Conflict', async () => {
+    // 1. Setup: Create available item and request it (loan is REQUESTED, not ACTIVE)
+    const item = await prisma.item.create({
+      data: {
+        title: 'USB Logic Analyzer 8-Channel',
+        serialNumber: `LOG-${Date.now()}-3`,
+        category: 'Logic Analyzers',
+        isAvailable: true
+      }
+    });
+
+    const reqRes = await request(app)
+      .post('/api/loans/request')
+      .set('Authorization', `Bearer ${borrower1Token}`)
+      .send({ itemId: item.id });
+    const loanId = reqRes.body.loan.id;
+
+    // Sub-test A: Custodian attempts return on REQUESTED (non-ACTIVE) loan -> 409 Conflict
+    const nonActiveRes = await request(app)
+      .post(`/api/loans/${loanId}/return`)
+      .set('Authorization', `Bearer ${custodianToken}`)
+      .send({ conditionGrade: 'GOOD' });
+    expect(nonActiveRes.status).toBe(409);
+
+    // Activate the loan via custodian checkout
+    await request(app)
+      .post(`/api/loans/${loanId}/checkout`)
+      .set('Authorization', `Bearer ${custodianToken}`);
+
+    // Sub-test B: Borrower attempts return on ACTIVE loan -> 403 Forbidden (BR-06)
+    const borrowerRes = await request(app)
+      .post(`/api/loans/${loanId}/return`)
+      .set('Authorization', `Bearer ${borrower1Token}`)
+      .send({ conditionGrade: 'GOOD' });
+    expect(borrowerRes.status).toBe(403);
+  });
 });

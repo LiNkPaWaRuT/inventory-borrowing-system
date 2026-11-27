@@ -235,4 +235,73 @@ router.post('/:id/checkout', requireAuth, requireRole('CUSTODIAN'), async (req: 
   }
 });
 
+// POST /api/loans/:id/return [FR-08, BR-06, BR-07, AC-15, AC-16, AC-17]
+// Custodian checks in an active loan, assesses condition (GOOD, FAIR, DAMAGED), records notes, and updates item status
+router.post('/:id/return', requireAuth, requireRole('CUSTODIAN'), async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const { conditionGrade = 'GOOD', returnNotes } = req.body;
+
+  try {
+    const loan = await prisma.loan.findUnique({
+      where: { id },
+      include: { item: true }
+    });
+
+    if (!loan) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'LOAN_NOT_FOUND', message: 'Loan record not found.' }
+      });
+    }
+
+    // BR-06: Non-active loans cannot be returned (must be ACTIVE)
+    if (loan.status !== 'ACTIVE') {
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'INVALID_LOAN_STATUS',
+          message: `Cannot check in return for loan with status: ${loan.status}. Loan must be ACTIVE.`
+        }
+      });
+    }
+
+    // BR-07: Damaged condition quarantines item in MAINTENANCE (isAvailable = false)
+    // GOOD or FAIR restores item availability to true (status = AVAILABLE)
+    const isDamaged = conditionGrade === 'DAMAGED';
+    const itemAvailable = !isDamaged;
+    const itemStatus = isDamaged ? 'MAINTENANCE' : 'AVAILABLE';
+
+    const [updatedLoan, updatedItem] = await prisma.$transaction([
+      prisma.loan.update({
+        where: { id: loan.id },
+        data: {
+          status: 'RETURNED',
+          conditionGrade,
+          returnNotes: returnNotes || null,
+          returnedAt: new Date()
+        }
+      }),
+      prisma.item.update({
+        where: { id: loan.itemId },
+        data: {
+          isAvailable: itemAvailable,
+          status: itemStatus
+        }
+      })
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Equipment return successfully recorded.',
+      loan: updatedLoan,
+      item: updatedItem
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to process equipment return.' }
+    });
+  }
+});
+
 export default router;

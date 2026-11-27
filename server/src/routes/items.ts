@@ -24,8 +24,10 @@ router.get('/', requireAuth, async (req: AuthenticatedRequest, res: Response) =>
       const hasRequestedLoan = item.loans.some((l: any) => l.status === 'REQUESTED');
       const hasActiveLoan = item.loans.some((l: any) => l.status === 'ACTIVE');
 
-      let catalogStatus: 'AVAILABLE' | 'PENDING_APPROVAL' | 'CHECKED_OUT' = 'AVAILABLE';
-      if (hasRequestedLoan) {
+      let catalogStatus: 'AVAILABLE' | 'PENDING_APPROVAL' | 'CHECKED_OUT' | 'MAINTENANCE' = 'AVAILABLE';
+      if (item.status === 'MAINTENANCE') {
+        catalogStatus = 'MAINTENANCE';
+      } else if (hasRequestedLoan) {
         catalogStatus = 'PENDING_APPROVAL';
       } else if (hasActiveLoan || !item.isAvailable) {
         catalogStatus = 'CHECKED_OUT';
@@ -36,7 +38,7 @@ router.get('/', requireAuth, async (req: AuthenticatedRequest, res: Response) =>
         title: item.title,
         serialNumber: item.serialNumber,
         category: item.category,
-        isAvailable: item.isAvailable && item.loans.length === 0,
+        isAvailable: item.isAvailable && item.status !== 'MAINTENANCE' && item.loans.length === 0,
         hasPendingOrActiveLoan: item.loans.length > 0,
         catalogStatus
       };
