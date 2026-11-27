@@ -108,7 +108,10 @@ export const computeLoanOverdueDetails = (loan: any) => {
     const diffMs = now.getTime() - dueTime;
     if (diffMs > 0) {
       isOverdue = true;
-      daysOverdue = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      daysOverdue = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      if (daysOverdue === 0 && diffMs > 0) {
+        daysOverdue = 1;
+      }
       accruedFine = daysOverdue * 5.0; // $5.00 per day
     }
   } else if (loan.status === 'RETURNED' && (loan.penaltyFine || 0) > 0) {
@@ -311,7 +314,10 @@ router.post('/:id/return', requireAuth, requireRole('CUSTODIAN'), async (req: Au
     if (loan.dueAt) {
       const diffMs = returnedAt.getTime() - new Date(loan.dueAt).getTime();
       if (diffMs > 0) {
-        const daysOverdue = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        let daysOverdue = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (daysOverdue === 0 && diffMs > 0) {
+          daysOverdue = 1;
+        }
         penaltyFine = daysOverdue * 5.0; // $5.00/day
       }
     }
