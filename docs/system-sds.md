@@ -63,6 +63,7 @@ erDiagram
         string serialNumber UK
         string category
         boolean isAvailable
+        string status "AVAILABLE | PENDING_APPROVAL | CHECKED_OUT | MAINTENANCE"
         datetime createdAt
     }
 
@@ -70,9 +71,13 @@ erDiagram
         string id PK
         string itemId FK
         string borrowerId FK
-        string status "REQUESTED | ACTIVE | RETURNED"
+        string status "REQUESTED | ACTIVE | RETURNED | OVERDUE"
+        string conditionGrade "GOOD | FAIR | DAMAGED"
+        string returnNotes
+        float penaltyFine
         datetime requestedAt
         datetime checkedOutAt
+        datetime dueAt
         datetime returnedAt
     }
 ```
@@ -102,9 +107,11 @@ erDiagram
 | **Current User** | `/api/auth/me` | GET | Allowed | Allowed | Token required |
 | **View Catalog** | `/api/items` | GET | Allowed | Allowed | Any authenticated user |
 | **Request Loan** | `/api/loans/request` | POST | **Allowed** | Denied | `item.isAvailable == true`, `BR-01`, `BR-02`, `BR-04` (max 2 active loans) |
+| **Batch Request (Sprint 3)** | `/api/loans/batch` | POST | **Allowed** | Denied | Atomic transaction, max 2 items, `BR-04`, `BR-09` |
 | **View My Loans**| `/api/loans/my-loans`| GET | **Allowed** | Allowed | Borrower sees only own records |
 | **View All Loans**| `/api/custodian/loans`| GET | **Forbidden (403)** | **Allowed** | Restricted to Custodian |
-| **Record Checkout**| `/api/loans/:id/checkout`| POST | **Forbidden (403)** | **Allowed** | Item must be available; transitions to `ACTIVE` |
+| **Record Checkout**| `/api/loans/:id/checkout`| POST | **Forbidden (403)** | **Allowed** | Item must be available; transitions to `ACTIVE`; sets `dueAt` |
+| **Check-in Return (Sprint 2)**| `/api/loans/:id/return`| POST | **Forbidden (403)** | **Allowed** | Restores availability (or maintenance if damaged), clears quota |
 
 ### 3.3 API Error Response Standard
 All API errors return consistent JSON:
@@ -131,6 +138,42 @@ In `BorrowerDashboard.tsx`:
 - The client counts active loans where `loan.status === 'REQUESTED' || loan.status === 'ACTIVE'`.
 - The UI renders an active quota indicator badge: `Active Loans: {activeLoanCount} / 2`.
 - When an attempt to borrow returns `409` with error `LOAN_LIMIT_EXCEEDED`, the UI displays a dismissible warning alert advising the borrower to await Custodian check-in or return existing equipment.
+
+### 3.5 Return & Condition Grading Contract (Sprint 2 / F-03)
+Endpoint: `POST /api/loans/:id/return`
+Headers: `Authorization: Bearer <custodian_jwt>`
+Payload:
+```json
+{
+  "conditionGrade": "GOOD | FAIR | DAMAGED",
+  "returnNotes": "Optional inspection notes"
+}
+```
+Responses:
+- `200 OK`: Loan status -> `RETURNED`, item availability restored (or `MAINTENANCE` if damaged).
+  ```json
+  {
+    "success": true,
+    "message": "Equipment return successfully recorded.",
+    "loan": { "id": "...", "status": "RETURNED", "conditionGrade": "GOOD" },
+    "item": { "id": "...", "isAvailable": true, "status": "AVAILABLE" }
+  }
+  ```
+- `403 Forbidden`: If called by `BORROWER` role.
+- `409 Conflict`: If loan is not currently in `ACTIVE` status.
+
+### 3.6 Multi-Item Batch Request Contract (Sprint 3 / F-05)
+Endpoint: `POST /api/loans/batch`
+Headers: `Authorization: Bearer <borrower_jwt>`
+Payload:
+```json
+{
+  "itemIds": ["item-id-1", "item-id-2"]
+}
+```
+Responses:
+- `201 Created`: All items requested successfully inside a single database transaction.
+- `409 Conflict`: If total batch size + existing active/requested loans > 2 (`LOAN_LIMIT_EXCEEDED`), or if any item in the batch is unavailable. Entire transaction rolled back.
 
 ---
 
