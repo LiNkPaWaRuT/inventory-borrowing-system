@@ -96,6 +96,129 @@ router.post('/request', requireAuth, requireRole('BORROWER'), async (req: Authen
   }
 });
 
+// POST /api/loans/batch [FR-10, BR-04, BR-09, AC-20, AC-21, AC-22]
+// Multi-item transactional batch borrow request with quota verification and atomic rollback
+router.post('/batch', requireAuth, requireRole('BORROWER'), async (req: AuthenticatedRequest, res: Response) => {
+  const { itemIds } = req.body;
+
+  if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: 'INVALID_INPUT',
+      message: 'itemIds must be a non-empty array of item IDs.'
+    });
+  }
+
+  // Quota & Batch boundary: Max 2 items in batch
+  if (itemIds.length > 2) {
+    return res.status(409).json({
+      success: false,
+      error: 'LOAN_LIMIT_EXCEEDED',
+      message: 'Batch request exceeds borrower concurrent loan limit of 2.'
+    });
+  }
+
+  // Reject duplicate items in same batch
+  const uniqueItemIds = Array.from(new Set(itemIds));
+  if (uniqueItemIds.length !== itemIds.length) {
+    return res.status(400).json({
+      success: false,
+      error: 'INVALID_INPUT',
+      message: 'Batch request cannot contain duplicate items.'
+    });
+  }
+
+  try {
+    // BR-04 & BR-09: Pre-check borrower concurrent loan quota
+    const activeLoanCount = await prisma.loan.count({
+      where: {
+        borrowerId: req.user!.userId,
+        status: { in: ['REQUESTED', 'ACTIVE'] }
+      }
+    });
+
+    if (activeLoanCount + itemIds.length > 2) {
+      return res.status(409).json({
+        success: false,
+        error: 'LOAN_LIMIT_EXCEEDED',
+        message: 'Batch request exceeds borrower concurrent loan limit of 2.'
+      });
+    }
+
+    // Atomic execution inside Prisma Transaction (BR-09, AC-20, AC-22)
+    const createdLoans = await prisma.$transaction(async (tx) => {
+      const results = [];
+
+      for (const itemId of itemIds) {
+        const item = await tx.item.findUnique({
+          where: { id: itemId }
+        });
+
+        if (!item || !item.isAvailable) {
+          const err: any = new Error(`Item ${item?.title || itemId} is not available for borrowing.`);
+          err.code = 'ITEM_UNAVAILABLE';
+          throw err;
+        }
+
+        const existingLoan = await tx.loan.findFirst({
+          where: {
+            itemId,
+            status: { in: ['REQUESTED', 'ACTIVE'] }
+          }
+        });
+
+        if (existingLoan) {
+          const err: any = new Error(`Item ${item.title} already has an active or pending loan.`);
+          err.code = 'ITEM_UNAVAILABLE';
+          throw err;
+        }
+
+        const loan = await tx.loan.create({
+          data: {
+            itemId,
+            borrowerId: req.user!.userId,
+            status: 'REQUESTED'
+          },
+          include: {
+            item: true
+          }
+        });
+
+        results.push(loan);
+      }
+
+      return results;
+    });
+
+    return res.status(201).json({
+      success: true,
+      count: createdLoans.length,
+      loans: createdLoans
+    });
+  } catch (error: any) {
+    if (error.code === 'ITEM_UNAVAILABLE') {
+      return res.status(409).json({
+        success: false,
+        error: 'ITEM_UNAVAILABLE',
+        message: error.message
+      });
+    }
+
+    if (error.code === 'LOAN_LIMIT_EXCEEDED') {
+      return res.status(409).json({
+        success: false,
+        error: 'LOAN_LIMIT_EXCEEDED',
+        message: error.message
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to process batch borrow request.' }
+    });
+  }
+});
+
 // Helper function: Compute overdue status, days overdue, and accrued penalty fine (FR-09, BR-08)
 export const computeLoanOverdueDetails = (loan: any) => {
   const now = new Date();

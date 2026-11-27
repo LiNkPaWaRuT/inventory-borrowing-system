@@ -34,6 +34,8 @@ export const BorrowerDashboard: React.FC = () => {
   const [myLoans, setMyLoans] = useState<Loan[]>([]);
   const [loading, setLoading] = useState(true);
   const [submittingItemId, setSubmittingItemId] = useState<string | null>(null);
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
+  const [batchSubmitting, setBatchSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const fetchData = async () => {
@@ -98,6 +100,61 @@ export const BorrowerDashboard: React.FC = () => {
     (loan) => loan.status === 'REQUESTED' || loan.status === 'ACTIVE'
   ).length;
   const isQuotaReached = activeLoanCount >= 2;
+  const remainingQuota = Math.max(0, 2 - activeLoanCount);
+
+  const handleToggleSelect = (itemId: string) => {
+    setFeedback(null);
+    setSelectedItemIds((prev) => {
+      if (prev.includes(itemId)) {
+        return prev.filter((id) => id !== itemId);
+      } else {
+        if (prev.length >= remainingQuota) {
+          setFeedback({
+            type: 'error',
+            message: `Cannot select more items. Your remaining concurrent loan quota is ${remainingQuota}.`
+          });
+          return prev;
+        }
+        return [...prev, itemId];
+      }
+    });
+  };
+
+  const handleBatchBorrow = async () => {
+    if (selectedItemIds.length === 0) return;
+    setFeedback(null);
+    setBatchSubmitting(true);
+
+    try {
+      const res = await fetch('/api/loans/batch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ itemIds: selectedItemIds })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || data.error?.message || (typeof data.error === 'string' ? data.error : 'Failed to process batch request.'));
+      }
+
+      setFeedback({
+        type: 'success',
+        message: `Successfully requested batch of ${data.count} items! Status is REQUESTED, awaiting Custodian checkout approval.`
+      });
+      setSelectedItemIds([]);
+      await fetchData();
+    } catch (err: any) {
+      setFeedback({
+        type: 'error',
+        message: err.message || 'An error occurred during batch borrow request.'
+      });
+    } finally {
+      setBatchSubmitting(false);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
@@ -177,6 +234,57 @@ export const BorrowerDashboard: React.FC = () => {
           </div>
         )}
 
+        {selectedItemIds.length > 0 && (
+          <div
+            style={{
+              marginBottom: '16px',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1e40af', fontSize: '14px', fontWeight: 500 }}>
+              <span>🛒</span>
+              <span>{selectedItemIds.length} item(s) selected for batch borrow (Remaining quota: {remainingQuota})</span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => setSelectedItemIds([])}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: '13px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  background: '#fff',
+                  cursor: 'pointer'
+                }}
+              >
+                Clear Selection
+              </button>
+              <button
+                onClick={handleBatchBorrow}
+                disabled={batchSubmitting || isQuotaReached}
+                style={{
+                  padding: '6px 16px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: '#2563eb',
+                  color: '#fff',
+                  cursor: batchSubmitting ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {batchSubmitting ? 'Requesting Batch...' : `Submit Batch Request (${selectedItemIds.length})`}
+              </button>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <p style={{ color: '#64748b', fontSize: '14px' }}>Loading catalog...</p>
         ) : (
@@ -184,6 +292,7 @@ export const BorrowerDashboard: React.FC = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#475569' }}>
+                  <th style={{ padding: '10px 12px', width: '40px', textAlign: 'center' }}>Select</th>
                   <th style={{ padding: '10px 12px' }}>Item Title</th>
                   <th style={{ padding: '10px 12px' }}>Serial Number</th>
                   <th style={{ padding: '10px 12px' }}>Category</th>
@@ -194,6 +303,16 @@ export const BorrowerDashboard: React.FC = () => {
               <tbody>
                 {items.map((item) => (
                   <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedItemIds.includes(item.id)}
+                        disabled={!item.isAvailable || isQuotaReached}
+                        onChange={() => handleToggleSelect(item.id)}
+                        aria-label={`Select ${item.title}`}
+                        style={{ cursor: !item.isAvailable || isQuotaReached ? 'not-allowed' : 'pointer', width: '16px', height: '16px' }}
+                      />
+                    </td>
                     <td style={{ padding: '12px', fontWeight: 600, color: '#0f172a' }}>{item.title}</td>
                     <td style={{ padding: '12px', color: '#64748b', fontFamily: 'monospace' }}>{item.serialNumber}</td>
                     <td style={{ padding: '12px', color: '#475569' }}>{item.category}</td>

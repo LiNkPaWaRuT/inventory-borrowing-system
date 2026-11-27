@@ -607,4 +607,152 @@ describe('Feature F02: Item Catalog, Request, and Custodian Checkout Workflow', 
     const dbItem = await prisma.item.findUnique({ where: { id: item.id } });
     expect(dbItem?.isAvailable).toBe(true);
   });
+
+  // ==========================================
+  // SPRINT 3: MULTI-ITEM BATCH BORROWING (F-05)
+  // ==========================================
+
+  // TEST-BAT-01: Multi-Item Batch Request Atomic Success (Sprint 3 / F-05) [FR-10, BR-09, AC-20]
+  it('TEST-BAT-01: Borrower with 0 active loans atomically requests 2 available items (F-05)', async () => {
+    // 1. Setup: Create 2 available items
+    const item1 = await prisma.item.create({
+      data: {
+        title: 'Raspberry Pi 4 Model B 8GB',
+        serialNumber: `RPI-${Date.now()}-1`,
+        category: 'Single Board Computers',
+        isAvailable: true
+      }
+    });
+
+    const item2 = await prisma.item.create({
+      data: {
+        title: 'Arduino Giga R1 WiFi',
+        serialNumber: `ARD-${Date.now()}-2`,
+        category: 'Microcontrollers',
+        isAvailable: true
+      }
+    });
+
+    // 2. Action: Borrower submits batch borrow request for both items
+    const batchRes = await request(app)
+      .post('/api/loans/batch')
+      .set('Authorization', `Bearer ${borrower1Token}`)
+      .send({ itemIds: [item1.id, item2.id] });
+
+    expect(batchRes.status).toBe(201);
+    expect(batchRes.body.success).toBe(true);
+    expect(batchRes.body.count).toBe(2);
+    expect(batchRes.body.loans.length).toBe(2);
+    expect(batchRes.body.loans.every((l: any) => l.status === 'REQUESTED')).toBe(true);
+
+    // 3. Verify Quota in DB: Borrower active/pending loans count is now exactly 2
+    const b1User = await prisma.user.findUnique({ where: { email: 'borrower1@example.com' } });
+    const activeLoans = await prisma.loan.count({
+      where: {
+        borrowerId: b1User!.id,
+        status: { in: ['REQUESTED', 'ACTIVE'] }
+      }
+    });
+    expect(activeLoans).toBe(2);
+  });
+
+  // TEST-BAT-02: Batch Request Quota Rejection & Rollback (Sprint 3 / F-05) [BR-04, BR-09, AC-21]
+  it('TEST-BAT-02: Batch request exceeding quota rolls back atomically without inserting rows (F-05)', async () => {
+    // 1. Setup: Create 3 available items, borrower already has 1 requested loan
+    const itemA = await prisma.item.create({
+      data: {
+        title: 'Logic Analyzer 16-Channel',
+        serialNumber: `LOG-${Date.now()}-A`,
+        category: 'Test & Measurement',
+        isAvailable: true
+      }
+    });
+
+    const itemB = await prisma.item.create({
+      data: {
+        title: 'DC Power Supply 30V 5A',
+        serialNumber: `PWR-${Date.now()}-B`,
+        category: 'Power Supplies',
+        isAvailable: true
+      }
+    });
+
+    const itemC = await prisma.item.create({
+      data: {
+        title: 'Digital Multimeter True RMS',
+        serialNumber: `DMM-${Date.now()}-C`,
+        category: 'Test & Measurement',
+        isAvailable: true
+      }
+    });
+
+    // Borrower requests itemA single-item (Quota: 1/2)
+    const singleRes = await request(app)
+      .post('/api/loans/request')
+      .set('Authorization', `Bearer ${borrower1Token}`)
+      .send({ itemId: itemA.id });
+    expect(singleRes.status).toBe(201);
+
+    // 2. Action: Borrower attempts batch request with 2 items (itemB and itemC) -> Total would be 1 + 2 = 3 > 2!
+    const batchRes = await request(app)
+      .post('/api/loans/batch')
+      .set('Authorization', `Bearer ${borrower1Token}`)
+      .send({ itemIds: [itemB.id, itemC.id] });
+
+    // 3. Assertion: Rejected with 409 Conflict LOAN_LIMIT_EXCEEDED
+    expect(batchRes.status).toBe(409);
+    expect(batchRes.body.error).toBe('LOAN_LIMIT_EXCEEDED');
+    expect(batchRes.body.message).toContain('limit of 2');
+
+    // 4. Assertion: Atomic rollback - Item B and Item C have 0 loans in DB
+    const itemBLoan = await prisma.loan.findFirst({ where: { itemId: itemB.id } });
+    const itemCLoan = await prisma.loan.findFirst({ where: { itemId: itemC.id } });
+    expect(itemBLoan).toBeNull();
+    expect(itemCLoan).toBeNull();
+
+    // Borrower still holds strictly 1 active loan
+    const b1User = await prisma.user.findUnique({ where: { email: 'borrower1@example.com' } });
+    const activeLoans = await prisma.loan.count({
+      where: {
+        borrowerId: b1User!.id,
+        status: { in: ['REQUESTED', 'ACTIVE'] }
+      }
+    });
+    expect(activeLoans).toBe(1);
+  });
+
+  // TEST-BAT-03: Partial Availability Rollback (Sprint 3 / F-05) [BR-01, BR-09, AC-22]
+  it('TEST-BAT-03: If any item in batch is unavailable, entire batch rolls back with 409 (F-05)', async () => {
+    // 1. Setup: Item 1 is available, Item 2 is unavailable
+    const itemAvailable = await prisma.item.create({
+      data: {
+        title: 'Soldering Mat Anti-Static',
+        serialNumber: `MAT-${Date.now()}-1`,
+        category: 'Accessories',
+        isAvailable: true
+      }
+    });
+
+    const itemUnavailable = await prisma.item.create({
+      data: {
+        title: 'Spectrum Analyzer 3GHz',
+        serialNumber: `SPEC-${Date.now()}-2`,
+        category: 'RF Equipment',
+        isAvailable: false
+      }
+    });
+
+    // 2. Action: Batch request containing 1 available and 1 unavailable item
+    const batchRes = await request(app)
+      .post('/api/loans/batch')
+      .set('Authorization', `Bearer ${borrower1Token}`)
+      .send({ itemIds: [itemAvailable.id, itemUnavailable.id] });
+
+    expect(batchRes.status).toBe(409);
+    expect(batchRes.body.error).toBe('ITEM_UNAVAILABLE');
+
+    // 3. Assertion: Atomic rollback - 0 loan records created for itemAvailable
+    const loanForAvail = await prisma.loan.findFirst({ where: { itemId: itemAvailable.id } });
+    expect(loanForAvail).toBeNull();
+  });
 });
