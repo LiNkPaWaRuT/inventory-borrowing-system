@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { prisma } from '../prisma.js';
 import { requireAuth, requireRole, AuthenticatedRequest } from '../middleware/auth.js';
+import { computeLoanOverdueDetails } from './loans.js';
 
 const router = Router();
 
@@ -9,11 +10,11 @@ router.get('/check', requireAuth, requireRole('CUSTODIAN'), (req: AuthenticatedR
   return res.status(200).json({ success: true, message: 'Custodian access confirmed.' });
 });
 
-// GET /api/custodian/loans [FR-07, AC-12]
-// Custodian views all loan requests and active loans across the department
+// GET /api/custodian/loans [FR-07, AC-12, FR-09, AC-19]
+// Custodian views all loan requests and active loans across the department with computed overdue details
 router.get('/loans', requireAuth, requireRole('CUSTODIAN'), async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const loans = await prisma.loan.findMany({
+    const rawLoans = await prisma.loan.findMany({
       include: {
         item: true,
         borrower: {
@@ -22,6 +23,8 @@ router.get('/loans', requireAuth, requireRole('CUSTODIAN'), async (req: Authenti
       },
       orderBy: { requestedAt: 'desc' }
     });
+
+    const loans = rawLoans.map(computeLoanOverdueDetails);
 
     return res.status(200).json({
       success: true,

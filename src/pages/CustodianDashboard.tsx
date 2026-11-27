@@ -14,15 +14,24 @@ interface Item {
   serialNumber: string;
   category: string;
   isAvailable: boolean;
+  status?: string;
 }
 
 interface Loan {
   id: string;
   itemId: string;
   borrowerId: string;
-  status: 'REQUESTED' | 'ACTIVE' | 'RETURNED';
+  status: 'REQUESTED' | 'ACTIVE' | 'RETURNED' | 'OVERDUE';
+  conditionGrade?: 'GOOD' | 'FAIR' | 'DAMAGED';
+  returnNotes?: string;
+  penaltyFine?: number;
+  dueAt?: string;
+  isOverdue?: boolean;
+  daysOverdue?: number;
+  accruedFine?: number;
   requestedAt: string;
   checkedOutAt?: string;
+  returnedAt?: string;
   item: Item;
   borrower: Borrower;
 }
@@ -33,6 +42,9 @@ export const CustodianDashboard: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingLoanId, setProcessingLoanId] = useState<string | null>(null);
+  const [returnModalLoan, setReturnModalLoan] = useState<Loan | null>(null);
+  const [conditionGrade, setConditionGrade] = useState<'GOOD' | 'FAIR' | 'DAMAGED'>('GOOD');
+  const [returnNotes, setReturnNotes] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const fetchData = async () => {
@@ -86,6 +98,46 @@ export const CustodianDashboard: React.FC = () => {
       setFeedback({
         type: 'error',
         message: err.message || 'Checkout failed.'
+      });
+    } finally {
+      setProcessingLoanId(null);
+    }
+  };
+
+  const handleReturn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!returnModalLoan) return;
+
+    setFeedback(null);
+    setProcessingLoanId(returnModalLoan.id);
+
+    try {
+      const res = await fetch(`/api/loans/${returnModalLoan.id}/return`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ conditionGrade, returnNotes })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error?.message || 'Failed to process equipment return.');
+      }
+
+      setFeedback({
+        type: 'success',
+        message: `Equipment return confirmed for "${returnModalLoan.item?.title}"! Condition assessed as ${conditionGrade}. Item ${conditionGrade === 'DAMAGED' ? 'quarantined in MAINTENANCE' : 'restored to AVAILABLE'}.`
+      });
+      setReturnModalLoan(null);
+      setConditionGrade('GOOD');
+      setReturnNotes('');
+      await fetchData();
+    } catch (err: any) {
+      setFeedback({
+        type: 'error',
+        message: err.message || 'Equipment return failed.'
       });
     } finally {
       setProcessingLoanId(null);
@@ -218,7 +270,9 @@ export const CustodianDashboard: React.FC = () => {
                   <th style={{ padding: '10px 12px' }}>Item Title</th>
                   <th style={{ padding: '10px 12px' }}>Current Holder</th>
                   <th style={{ padding: '10px 12px' }}>Checked Out At</th>
-                  <th style={{ padding: '10px 12px' }}>Status</th>
+                  <th style={{ padding: '10px 12px' }}>Due Date</th>
+                  <th style={{ padding: '10px 12px' }}>Status & Penalty</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'right' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -237,19 +291,51 @@ export const CustodianDashboard: React.FC = () => {
                     <td style={{ padding: '12px', color: '#475569', fontSize: '13px' }}>
                       {loan.checkedOutAt ? new Date(loan.checkedOutAt).toLocaleString() : 'N/A'}
                     </td>
+                    <td style={{ padding: '12px', color: loan.isOverdue ? '#dc2626' : '#475569', fontSize: '13px', fontWeight: loan.isOverdue ? 600 : 400 }}>
+                      {loan.dueAt ? new Date(loan.dueAt).toLocaleDateString() : '—'}
+                    </td>
                     <td style={{ padding: '12px' }}>
-                      <span
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            background: loan.isOverdue ? '#fee2e2' : '#dbeafe',
+                            color: loan.isOverdue ? '#b91c1c' : '#1d4ed8'
+                          }}
+                        >
+                          {loan.isOverdue ? '⚠️ OVERDUE' : 'ACTIVE'}
+                        </span>
+                        {(loan.accruedFine || 0) > 0 && (
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#b91c1c' }}>
+                            Fine: ${(loan.accruedFine || 0).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td style={{ padding: '12px', textAlign: 'right' }}>
+                      <button
+                        onClick={() => {
+                          setReturnModalLoan(loan);
+                          setConditionGrade('GOOD');
+                          setReturnNotes('');
+                        }}
+                        disabled={processingLoanId === loan.id}
                         style={{
-                          padding: '3px 8px',
-                          borderRadius: '12px',
-                          fontSize: '12px',
+                          padding: '6px 14px',
+                          fontSize: '13px',
                           fontWeight: 600,
-                          background: '#dbeafe',
-                          color: '#1d4ed8'
+                          borderRadius: '6px',
+                          border: 'none',
+                          cursor: processingLoanId === loan.id ? 'not-allowed' : 'pointer',
+                          background: '#2563eb',
+                          color: '#fff'
                         }}
                       >
-                        ACTIVE
-                      </span>
+                        {processingLoanId === loan.id ? 'Processing...' : 'Check-in Return'}
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -258,6 +344,124 @@ export const CustodianDashboard: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* Return & Condition Grading Modal */}
+      {returnModalLoan && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: '12px',
+              padding: '24px',
+              width: '100%',
+              maxWidth: '480px',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+            }}
+          >
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#0f172a' }}>
+              Equipment Return & Physical Condition Grading
+            </h3>
+            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b' }}>
+              Assessing return of <strong>{returnModalLoan.item?.title}</strong> (SN: {returnModalLoan.item?.serialNumber}) from {returnModalLoan.borrower?.name}.
+            </p>
+
+            <form onSubmit={handleReturn} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                  Physical Condition Assessment
+                </label>
+                <select
+                  value={conditionGrade}
+                  onChange={(e) => setConditionGrade(e.target.value as any)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '14px'
+                  }}
+                >
+                  <option value="GOOD">GOOD — Normal wear, all functional (Item restored to Available)</option>
+                  <option value="FAIR">FAIR — Minor cosmetic blemishes, functional (Item restored to Available)</option>
+                  <option value="DAMAGED">DAMAGED — Physical damage/defect (Quarantined in Maintenance)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                  Inspection Notes (Optional)
+                </label>
+                <textarea
+                  rows={3}
+                  value={returnNotes}
+                  onChange={(e) => setReturnNotes(e.target.value)}
+                  placeholder="e.g. Returned with original probe leads and carrying case."
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '13px',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReturnModalLoan(null);
+                    setConditionGrade('GOOD');
+                    setReturnNotes('');
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '13px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: '#f8fafc',
+                    color: '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={processingLoanId === returnModalLoan.id}
+                  style={{
+                    padding: '8px 18px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: conditionGrade === 'DAMAGED' ? '#dc2626' : '#2563eb',
+                    color: '#fff',
+                    cursor: processingLoanId === returnModalLoan.id ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {processingLoanId === returnModalLoan.id ? 'Confirming...' : 'Confirm Return & Check-in'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Live Inventory Overview Section */}
       <section style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '20px' }}>
@@ -291,11 +495,25 @@ export const CustodianDashboard: React.FC = () => {
                         borderRadius: '12px',
                         fontSize: '12px',
                         fontWeight: 600,
-                        background: item.isAvailable ? '#dcfce7' : '#fee2e2',
-                        color: item.isAvailable ? '#15803d' : '#b91c1c'
+                        background:
+                          item.status === 'MAINTENANCE'
+                            ? '#fee2e2'
+                            : item.isAvailable
+                            ? '#dcfce7'
+                            : '#fee2e2',
+                        color:
+                          item.status === 'MAINTENANCE'
+                            ? '#b91c1c'
+                            : item.isAvailable
+                            ? '#15803d'
+                            : '#b91c1c'
                       }}
                     >
-                      {item.isAvailable ? '● Available' : '○ Checked Out'}
+                      {item.status === 'MAINTENANCE'
+                        ? '⚠️ Maintenance'
+                        : item.isAvailable
+                        ? '● Available'
+                        : '○ Checked Out'}
                     </span>
                   </td>
                 </tr>

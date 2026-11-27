@@ -46,6 +46,10 @@ The **Inventory and Borrowing System** provides a reliable, centralized web plat
 - **FR-05 (Custodian Checkout):** The system shall allow a custodian to approve a pending loan request, marking the loan as `ACTIVE` and updating the item's availability to false.
 - **FR-06 (Personal Loan Retrieval):** The system shall allow a borrower to retrieve a list of only their own loan requests and active loans.
 - **FR-07 (Custodian Loan Overview):** The system shall allow a custodian to view all loan requests and active loans across all borrowers.
+- **FR-08 (Equipment Return & Condition Grading - Sprint 2):** The system shall permit a custodian to check in an active equipment loan (`POST /api/loans/:id/return`), record the physical condition assessment (`GOOD`, `FAIR`, or `DAMAGED`), add return notes, and automatically update item availability status.
+- **FR-09 (Due Dates & Overdue Penalty Engine - Sprint 2):** The system shall assign a return due timestamp (`dueAt`, default 7 calendar days) upon checkout approval, detect overdue loans past `dueAt`, and compute accrued daily overdue penalty fines.
+- **FR-10 (Multi-Item Batch Borrowing - Sprint 3):** The system shall allow an authenticated borrower to submit a single transactional batch request (`POST /api/loans/batch`) for up to 2 items simultaneously, ensuring atomic insertion and strict quota enforcement.
+- **FR-11 (Inventory Search & Filter - Sprint 3):** The system shall allow users to search equipment by title, serial number, or category, and filter items by real-time status.
 
 ---
 
@@ -55,6 +59,10 @@ The **Inventory and Borrowing System** provides a reliable, centralized web plat
 - **BR-03 (Role Segregation for Checkout):** Only users with the `CUSTODIAN` role are authorized to execute the checkout operation (`POST /api/loans/:id/checkout`). Borrowers attempting this operation must receive an HTTP `403 Forbidden`.
 - **BR-04 (Per-Borrower Concurrent Loan Quota - Adaptive Maintenance):** An authenticated `BORROWER` may hold at most **2 concurrent loans** in `REQUESTED` or `ACTIVE` status combined. If a borrower currently holds 2 loans across these statuses, any subsequent borrow request shall be rejected with `HTTP 409 Conflict`, error payload `{"error": "LOAN_LIMIT_EXCEEDED", "message": "Borrower has reached the maximum limit of 2 concurrent loans (pending or active)."}`, and zero database rows shall be inserted. Loans with status `RETURNED` or `CANCELLED` do not count toward this limit.
 - **BR-05 (Ownership Data Isolation):** A borrower cannot inspect or modify another borrower's loan details. Unrelated borrower requests to private loan records must be rejected with HTTP `403 Forbidden`.
+- **BR-06 (Custodian Return Exclusivity - Sprint 2):** Only users with the `CUSTODIAN` role are authorized to execute the return and check-in operation (`POST /api/loans/:id/return`). Borrowers attempting return receive HTTP `403 Forbidden`. Non-active loans cannot be returned (HTTP `409 Conflict`).
+- **BR-07 (Damaged Condition Quarantine - Sprint 2):** When an item is returned with `conditionGrade == 'DAMAGED'`, the item state shall transition to `isAvailable = false` and status `MAINTENANCE`. Only items returned in `GOOD` or `FAIR` condition shall return to `isAvailable = true` (`AVAILABLE`).
+- **BR-08 (Overdue Penalty Formula - Sprint 2):** For active loans exceeding `dueAt`, the overdue penalty fine is calculated as: `fine = max(0, ceil((now - dueAt) / (1000 * 60 * 60 * 24))) * 5.00` ($5.00 per elapsed calendar day).
+- **BR-09 (Atomic Batch Validation - Sprint 3):** In a batch borrow request (`POST /api/loans/batch`), all items must be available and the total items in the batch plus the borrower's currently held active/pending loans must not exceed 2. If any item is unavailable or the limit is exceeded, the entire transaction rolls back with zero rows persisted (HTTP `409 Conflict`).
 
 ---
 
@@ -73,6 +81,14 @@ The **Inventory and Borrowing System** provides a reliable, centralized web plat
 - **AC-12:** Custodian checkout transitions loan from `REQUESTED` to `ACTIVE` and sets `item.isAvailable = false`.
 - **AC-13 (Quota Baseline Allowed Request):** An authenticated borrower holding 0 or 1 active/pending loans submitting a request for an available item shall succeed with HTTP 201 Created and loan status `REQUESTED`.
 - **AC-14 (Quota Limit Rejection):** An authenticated borrower holding 2 active/pending loans submitting a 3rd borrow request shall be rejected with HTTP 409 Conflict and error code `LOAN_LIMIT_EXCEEDED`, and zero database rows shall be inserted.
+- **AC-15 (Return - Good/Fair Condition):** Custodian checking in an active loan with condition `GOOD` or `FAIR` transitions loan to `RETURNED`, records `returnedAt`, and restores `item.isAvailable = true` (`AVAILABLE`), freeing the borrower's loan quota.
+- **AC-16 (Return - Damaged Condition Quarantine):** Custodian checking in an active loan with condition `DAMAGED` transitions loan to `RETURNED`, but places the item into maintenance (`item.isAvailable = false`, status `MAINTENANCE`).
+- **AC-17 (Return - Authorization & State Guard):** Borrower calling `POST /api/loans/:id/return` receives HTTP 403 Forbidden. Attempting return on a non-ACTIVE loan receives HTTP 409 Conflict.
+- **AC-18 (Due Date Assignment on Checkout):** Upon Custodian checkout approval, system sets `loan.dueAt` to 7 days from the checkout timestamp.
+- **AC-19 (Overdue Calculation):** If current date exceeds `loan.dueAt`, loan displays `OVERDUE` indicator and computes daily accrued fine ($5.00/day).
+- **AC-20 (Batch Borrow Atomic Success):** Borrower with 0 active loans submitting batch of 2 available items receives HTTP 201 Created with 2 loan records created in `REQUESTED` status.
+- **AC-21 (Batch Borrow Quota Violation):** Borrower submitting batch where (batch size + current active loans) > 2 receives HTTP 409 Conflict `LOAN_LIMIT_EXCEEDED`, and zero rows are inserted.
+- **AC-22 (Batch Borrow Partial Availability Rollback):** If 1 of the items in a batch request is already checked out, the entire batch request fails with HTTP 409 Conflict, and zero items are requested.
 
 ---
 

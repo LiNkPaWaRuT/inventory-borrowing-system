@@ -25,20 +25,25 @@ model Item {
   serialNumber String   @unique
   category     String
   isAvailable  Boolean  @default(true)
+  status       String   @default("AVAILABLE") // "AVAILABLE" | "PENDING_APPROVAL" | "CHECKED_OUT" | "MAINTENANCE"
   createdAt    DateTime @default(now())
 
   loans        Loan[]
 }
 
 model Loan {
-  id           String    @id @default(uuid())
-  itemId       String
-  borrowerId   String
-  status       String    @default("REQUESTED") // "REQUESTED" | "ACTIVE" | "RETURNED"
-  requestedAt  DateTime  @default(now())
-  checkedOutAt DateTime?
-  returnedAt   DateTime?
+  id             String    @id @default(uuid())
+  itemId         String
+  borrowerId     String
+  status         String    @default("REQUESTED") // "REQUESTED" | "ACTIVE" | "RETURNED" | "OVERDUE"
+  conditionGrade String?   // "GOOD" | "FAIR" | "DAMAGED"
+  returnNotes    String?
+  penaltyFine    Float?    @default(0.0)
+  dueAt          DateTime?
+  requestedAt    DateTime  @default(now())
+  checkedOutAt   DateTime?
+  returnedAt     DateTime?
 
-  item         Item      @relation(fields: [itemId], references: [id])
-  borrower     User      @relation(fields: [borrowerId], references: [id])
+  item           Item      @relation(fields: [itemId], references: [id])
+  borrower       User      @relation(fields: [borrowerId], references: [id])
 }
