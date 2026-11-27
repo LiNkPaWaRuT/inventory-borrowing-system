@@ -14,9 +14,17 @@ interface Item {
 interface Loan {
   id: string;
   itemId: string;
-  status: 'REQUESTED' | 'ACTIVE' | 'RETURNED';
+  status: 'REQUESTED' | 'ACTIVE' | 'RETURNED' | 'OVERDUE';
+  conditionGrade?: 'GOOD' | 'FAIR' | 'DAMAGED';
+  returnNotes?: string;
+  penaltyFine?: number;
+  dueAt?: string;
+  isOverdue?: boolean;
+  daysOverdue?: number;
+  accruedFine?: number;
   requestedAt: string;
   checkedOutAt?: string;
+  returnedAt?: string;
   item: Item;
 }
 
@@ -270,7 +278,8 @@ export const BorrowerDashboard: React.FC = () => {
                   <th style={{ padding: '10px 12px' }}>Loan ID</th>
                   <th style={{ padding: '10px 12px' }}>Item</th>
                   <th style={{ padding: '10px 12px' }}>Requested At</th>
-                  <th style={{ padding: '10px 12px' }}>Status</th>
+                  <th style={{ padding: '10px 12px' }}>Due Date</th>
+                  <th style={{ padding: '10px 12px' }}>Status & Penalty</th>
                 </tr>
               </thead>
               <tbody>
@@ -288,29 +297,43 @@ export const BorrowerDashboard: React.FC = () => {
                     <td style={{ padding: '12px', color: '#475569' }}>
                       {new Date(loan.requestedAt).toLocaleString()}
                     </td>
+                    <td style={{ padding: '12px', color: loan.isOverdue ? '#dc2626' : '#475569', fontWeight: loan.isOverdue ? 600 : 400 }}>
+                      {loan.dueAt ? new Date(loan.dueAt).toLocaleDateString() : '—'}
+                    </td>
                     <td style={{ padding: '12px' }}>
-                      <span
-                        style={{
-                          padding: '3px 8px',
-                          borderRadius: '12px',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          background:
-                            loan.status === 'REQUESTED'
-                              ? '#fef3c7'
-                              : loan.status === 'ACTIVE'
-                              ? '#dbeafe'
-                              : '#dcfce7',
-                          color:
-                            loan.status === 'REQUESTED'
-                              ? '#b45309'
-                              : loan.status === 'ACTIVE'
-                              ? '#1d4ed8'
-                              : '#15803d'
-                        }}
-                      >
-                        {loan.status}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            background:
+                              loan.isOverdue
+                                ? '#fee2e2'
+                                : loan.status === 'REQUESTED'
+                                ? '#fef3c7'
+                                : loan.status === 'ACTIVE'
+                                ? '#dbeafe'
+                                : '#dcfce7',
+                            color:
+                              loan.isOverdue
+                                ? '#b91c1c'
+                                : loan.status === 'REQUESTED'
+                                ? '#b45309'
+                                : loan.status === 'ACTIVE'
+                                ? '#1d4ed8'
+                                : '#15803d'
+                          }}
+                        >
+                          {loan.isOverdue ? '⚠️ OVERDUE' : loan.status}
+                        </span>
+                        {(loan.accruedFine || 0) > 0 && (
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#b91c1c' }}>
+                            Fine: ${(loan.accruedFine || 0).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

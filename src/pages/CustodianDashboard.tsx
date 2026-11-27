@@ -21,11 +21,17 @@ interface Loan {
   id: string;
   itemId: string;
   borrowerId: string;
-  status: 'REQUESTED' | 'ACTIVE' | 'RETURNED';
+  status: 'REQUESTED' | 'ACTIVE' | 'RETURNED' | 'OVERDUE';
   conditionGrade?: 'GOOD' | 'FAIR' | 'DAMAGED';
   returnNotes?: string;
+  penaltyFine?: number;
+  dueAt?: string;
+  isOverdue?: boolean;
+  daysOverdue?: number;
+  accruedFine?: number;
   requestedAt: string;
   checkedOutAt?: string;
+  returnedAt?: string;
   item: Item;
   borrower: Borrower;
 }
@@ -264,7 +270,8 @@ export const CustodianDashboard: React.FC = () => {
                   <th style={{ padding: '10px 12px' }}>Item Title</th>
                   <th style={{ padding: '10px 12px' }}>Current Holder</th>
                   <th style={{ padding: '10px 12px' }}>Checked Out At</th>
-                  <th style={{ padding: '10px 12px' }}>Status</th>
+                  <th style={{ padding: '10px 12px' }}>Due Date</th>
+                  <th style={{ padding: '10px 12px' }}>Status & Penalty</th>
                   <th style={{ padding: '10px 12px', textAlign: 'right' }}>Action</th>
                 </tr>
               </thead>
@@ -284,19 +291,29 @@ export const CustodianDashboard: React.FC = () => {
                     <td style={{ padding: '12px', color: '#475569', fontSize: '13px' }}>
                       {loan.checkedOutAt ? new Date(loan.checkedOutAt).toLocaleString() : 'N/A'}
                     </td>
+                    <td style={{ padding: '12px', color: loan.isOverdue ? '#dc2626' : '#475569', fontSize: '13px', fontWeight: loan.isOverdue ? 600 : 400 }}>
+                      {loan.dueAt ? new Date(loan.dueAt).toLocaleDateString() : '—'}
+                    </td>
                     <td style={{ padding: '12px' }}>
-                      <span
-                        style={{
-                          padding: '3px 8px',
-                          borderRadius: '12px',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          background: '#dbeafe',
-                          color: '#1d4ed8'
-                        }}
-                      >
-                        ACTIVE
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            background: loan.isOverdue ? '#fee2e2' : '#dbeafe',
+                            color: loan.isOverdue ? '#b91c1c' : '#1d4ed8'
+                          }}
+                        >
+                          {loan.isOverdue ? '⚠️ OVERDUE' : 'ACTIVE'}
+                        </span>
+                        {(loan.accruedFine || 0) > 0 && (
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#b91c1c' }}>
+                            Fine: ${(loan.accruedFine || 0).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td style={{ padding: '12px', textAlign: 'right' }}>
                       <button

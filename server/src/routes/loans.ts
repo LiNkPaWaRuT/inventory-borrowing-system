@@ -96,15 +96,45 @@ router.post('/request', requireAuth, requireRole('BORROWER'), async (req: Authen
   }
 });
 
+// Helper function: Compute overdue status, days overdue, and accrued penalty fine (FR-09, BR-08)
+export const computeLoanOverdueDetails = (loan: any) => {
+  const now = new Date();
+  let isOverdue = false;
+  let daysOverdue = 0;
+  let accruedFine = loan.penaltyFine || 0.0;
+
+  if (loan.status === 'ACTIVE' && loan.dueAt) {
+    const dueTime = new Date(loan.dueAt).getTime();
+    const diffMs = now.getTime() - dueTime;
+    if (diffMs > 0) {
+      isOverdue = true;
+      daysOverdue = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      accruedFine = daysOverdue * 5.0; // $5.00 per day
+    }
+  } else if (loan.status === 'RETURNED' && (loan.penaltyFine || 0) > 0) {
+    isOverdue = true;
+    accruedFine = loan.penaltyFine;
+  }
+
+  return {
+    ...loan,
+    isOverdue,
+    daysOverdue,
+    accruedFine
+  };
+};
+
 // GET /api/loans/my-loans [FR-06, BR-04]
 // Borrower retrieves only their own loan records
 router.get('/my-loans', requireAuth, requireRole('BORROWER'), async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const loans = await prisma.loan.findMany({
+    const rawLoans = await prisma.loan.findMany({
       where: { borrowerId: req.user!.userId },
       include: { item: true },
       orderBy: { requestedAt: 'desc' }
     });
+
+    const loans = rawLoans.map(computeLoanOverdueDetails);
 
     return res.status(200).json({
       success: true,
@@ -203,13 +233,17 @@ router.post('/:id/checkout', requireAuth, requireRole('CUSTODIAN'), async (req: 
       });
     }
 
-    // Atomic transaction: mark loan ACTIVE and item isAvailable = false
+    // Atomic transaction: mark loan ACTIVE, assign dueAt (7 days), and item isAvailable = false
+    const checkedOutAt = new Date();
+    const dueAt = new Date(checkedOutAt.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 calendar days
+
     const [updatedLoan, updatedItem] = await prisma.$transaction([
       prisma.loan.update({
         where: { id: loan.id },
         data: {
           status: 'ACTIVE',
-          checkedOutAt: new Date()
+          checkedOutAt,
+          dueAt
         }
       }),
       prisma.item.update({
@@ -271,6 +305,17 @@ router.post('/:id/return', requireAuth, requireRole('CUSTODIAN'), async (req: Au
     const itemAvailable = !isDamaged;
     const itemStatus = isDamaged ? 'MAINTENANCE' : 'AVAILABLE';
 
+    // FR-09 / BR-08: Finalize overdue penalty fine upon return if loan returned past dueAt
+    const returnedAt = new Date();
+    let penaltyFine = loan.penaltyFine || 0.0;
+    if (loan.dueAt) {
+      const diffMs = returnedAt.getTime() - new Date(loan.dueAt).getTime();
+      if (diffMs > 0) {
+        const daysOverdue = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        penaltyFine = daysOverdue * 5.0; // $5.00/day
+      }
+    }
+
     const [updatedLoan, updatedItem] = await prisma.$transaction([
       prisma.loan.update({
         where: { id: loan.id },
@@ -278,7 +323,8 @@ router.post('/:id/return', requireAuth, requireRole('CUSTODIAN'), async (req: Au
           status: 'RETURNED',
           conditionGrade,
           returnNotes: returnNotes || null,
-          returnedAt: new Date()
+          returnedAt,
+          penaltyFine
         }
       }),
       prisma.item.update({
